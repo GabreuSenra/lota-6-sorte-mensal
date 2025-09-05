@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { NumberPicker } from "@/components/NumberPicker";
 import { PrizeInfo } from "@/components/PrizeInfo";
@@ -10,14 +11,14 @@ import { Play, Shield, Clock, Trophy } from "lucide-react";
 const Index = () => {
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
   const [showNumberPicker, setShowNumberPicker] = useState(false);
+  const navigate = useNavigate();
 
   const handlePlayNow = () => {
     setShowNumberPicker(true);
   };
 
   const handleLogin = () => {
-    // TODO: Implement login modal/page
-    console.log("Login clicked");
+    navigate("/auth");
   };
 
   return (

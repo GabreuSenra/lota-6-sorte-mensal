@@ -14,7 +14,128 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bets: {
+        Row: {
+          amount: number
+          chosen_numbers: number[]
+          contest_id: string
+          created_at: string
+          hits: number | null
+          id: string
+          payment_id: string | null
+          payment_status: string
+          prize_amount: number | null
+          prize_paid: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          chosen_numbers: number[]
+          contest_id: string
+          created_at?: string
+          hits?: number | null
+          id?: string
+          payment_id?: string | null
+          payment_status?: string
+          prize_amount?: number | null
+          prize_paid?: boolean | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          chosen_numbers?: number[]
+          contest_id?: string
+          created_at?: string
+          hits?: number | null
+          id?: string
+          payment_id?: string | null
+          payment_status?: string
+          prize_amount?: number | null
+          prize_paid?: boolean | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bets_contest_id_fkey"
+            columns: ["contest_id"]
+            isOneToOne: false
+            referencedRelation: "contests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contests: {
+        Row: {
+          admin_fee_percentage: number | null
+          created_at: string
+          draw_date: string
+          id: string
+          lotomania_numbers: number[] | null
+          month_year: string
+          status: string
+          total_collected: number | null
+          updated_at: string
+        }
+        Insert: {
+          admin_fee_percentage?: number | null
+          created_at?: string
+          draw_date: string
+          id?: string
+          lotomania_numbers?: number[] | null
+          month_year: string
+          status?: string
+          total_collected?: number | null
+          updated_at?: string
+        }
+        Update: {
+          admin_fee_percentage?: number | null
+          created_at?: string
+          draw_date?: string
+          id?: string
+          lotomania_numbers?: number[] | null
+          month_year?: string
+          status?: string
+          total_collected?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          cpf: string
+          created_at: string
+          full_name: string
+          id: string
+          phone: string
+          pix_key: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cpf: string
+          created_at?: string
+          full_name: string
+          id?: string
+          phone: string
+          pix_key?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cpf?: string
+          created_at?: string
+          full_name?: string
+          id?: string
+          phone?: string
+          pix_key?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
