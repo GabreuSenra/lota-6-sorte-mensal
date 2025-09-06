@@ -105,31 +105,31 @@ export type Database = {
       }
       profiles: {
         Row: {
-          cpf: string
+          cpf: string | null
           created_at: string
           full_name: string
           id: string
-          phone: string
+          phone: string | null
           pix_key: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
-          cpf: string
+          cpf?: string | null
           created_at?: string
           full_name: string
           id?: string
-          phone: string
+          phone?: string | null
           pix_key?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
-          cpf?: string
+          cpf?: string | null
           created_at?: string
           full_name?: string
           id?: string
-          phone?: string
+          phone?: string | null
           pix_key?: string | null
           updated_at?: string
           user_id?: string
