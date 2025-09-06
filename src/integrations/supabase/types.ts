@@ -70,6 +70,7 @@ export type Database = {
       contests: {
         Row: {
           admin_fee_percentage: number | null
+          closing_date: string | null
           created_at: string
           draw_date: string
           id: string
@@ -81,6 +82,7 @@ export type Database = {
         }
         Insert: {
           admin_fee_percentage?: number | null
+          closing_date?: string | null
           created_at?: string
           draw_date: string
           id?: string
@@ -92,6 +94,7 @@ export type Database = {
         }
         Update: {
           admin_fee_percentage?: number | null
+          closing_date?: string | null
           created_at?: string
           draw_date?: string
           id?: string
@@ -111,6 +114,7 @@ export type Database = {
           id: string
           phone: string | null
           pix_key: string | null
+          role: string | null
           updated_at: string
           user_id: string
         }
@@ -121,6 +125,7 @@ export type Database = {
           id?: string
           phone?: string | null
           pix_key?: string | null
+          role?: string | null
           updated_at?: string
           user_id: string
         }
@@ -131,6 +136,64 @@ export type Database = {
           id?: string
           phone?: string | null
           pix_key?: string | null
+          role?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          status: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          status?: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          status?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      wallets: {
+        Row: {
+          balance: number
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          id?: string
           updated_at?: string
           user_id?: string
         }

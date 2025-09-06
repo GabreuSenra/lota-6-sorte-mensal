@@ -58,7 +58,7 @@ const Index = () => {
                 <Button 
                   variant="hero" 
                   size="xl" 
-                  onClick={handlePlayNow}
+                  onClick={() => navigate("/bet")}
                   className="shadow-glow"
                 >
                   <Play className="mr-2 h-5 w-5" />
@@ -193,13 +193,69 @@ const Index = () => {
       </main>
 
       <footer className="border-t border-border bg-background/50 py-8 mt-16">
-        <div className="container text-center space-y-4">
-          <p className="text-sm text-muted-foreground">
-            © 2024 Lota 6 Sorte. Sistema independente sem vínculo com a Caixa Econômica Federal.
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Utilizamos apenas os resultados oficiais da Lotomania como referência para nossos sorteios.
-          </p>
+        <div className="container">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-6">
+            <div>
+              <h3 className="font-semibold text-foreground mb-4">Lota 6 Sorte</h3>
+              <p className="text-sm text-muted-foreground">
+                O bolão mensal baseado na Lotomania oficial.
+              </p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground mb-4">Links Úteis</h3>
+              <div className="space-y-2">
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto justify-start text-sm"
+                  onClick={() => navigate("/terms")}
+                >
+                  Termos e Condições
+                </Button>
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto justify-start text-sm"
+                  onClick={() => navigate("/responsible-gaming")}
+                >
+                  Jogo Responsável
+                </Button>
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto justify-start text-sm"
+                  onClick={() => navigate("/privacy")}
+                >
+                  Política de Privacidade
+                </Button>
+              </div>
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground mb-4">Conta</h3>
+              <div className="space-y-2">
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto justify-start text-sm"
+                  onClick={() => navigate("/auth")}
+                >
+                  Entrar / Cadastrar
+                </Button>
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto justify-start text-sm"
+                  onClick={() => navigate("/dashboard")}
+                >
+                  Minha Conta
+                </Button>
+              </div>
+            </div>
+          </div>
+          
+          <div className="border-t pt-6 text-center space-y-2">
+            <p className="text-sm text-muted-foreground">
+              © 2025 Lota 6 Sorte. Sistema independente sem vínculo com a Caixa Econômica Federal.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Utilizamos apenas os resultados oficiais da Lotomania como referência para nossos sorteios.
+            </p>
+          </div>
         </div>
       </footer>
     </div>
