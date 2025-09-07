@@ -65,69 +65,33 @@ export default function Withdraw() {
   const handleWithdraw = async () => {
     const withdrawAmount = parseFloat(amount);
     
-    if (!withdrawAmount || withdrawAmount <= 0) {
-      toast({
-        title: "Valor inválido",
-        description: "Digite um valor válido para saque.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!profile?.pix_key) {
-      toast({
-        title: "Chave PIX necessária",
-        description: "Você precisa cadastrar uma chave PIX no seu perfil.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!wallet || withdrawAmount > wallet.balance) {
-      toast({
-        title: "Saldo insuficiente",
-        description: "Você não possui saldo suficiente para este saque.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (withdrawAmount < 10) {
-      toast({
-        title: "Valor mínimo",
-        description: "O valor mínimo para saque é R$ 10,00.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setWithdrawing(true);
     try {
-      // Create withdrawal transaction
-      const { error: transactionError } = await supabase
-        .from("transactions")
-        .insert({
-          user_id: user!.id,
-          type: "withdrawal",
-          amount: withdrawAmount,
-          status: "pending",
-          description: `Solicitação de saque via PIX: ${profile.pix_key}`,
-        });
+      const { data, error } = await supabase.functions.invoke('process-withdrawal', {
+        body: {
+          amount: withdrawAmount
+        }
+      });
 
-      if (transactionError) throw transactionError;
+      if (error) throw error;
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
 
       toast({
         title: "Solicitação enviada",
-        description: "Sua solicitação de saque foi registrada. O valor será processado em até 24 horas.",
+        description: data.message || "Sua solicitação de saque foi registrada. O valor será processado em até 24 horas.",
       });
 
       setAmount("");
+      fetchData(); // Refresh data
       navigate("/dashboard");
     } catch (error) {
       console.error("Error creating withdrawal:", error);
       toast({
         title: "Erro",
-        description: "Não foi possível processar sua solicitação.",
+        description: error.message || "Não foi possível processar sua solicitação.",
         variant: "destructive",
       });
     } finally {

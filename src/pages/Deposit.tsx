@@ -72,31 +72,41 @@ export default function Deposit() {
 
     setDepositing(true);
     try {
-      // Create deposit transaction
-      const { error: transactionError } = await supabase
-        .from("transactions")
-        .insert({
-          user_id: user!.id,
-          type: "deposit",
+      const { data, error } = await supabase.functions.invoke('create-pix-payment', {
+        body: {
           amount: depositAmount,
-          status: "pending",
-          description: `Solicitação de depósito via PIX`,
-        });
-
-      if (transactionError) throw transactionError;
-
-      toast({
-        title: "Solicitação enviada",
-        description: "Sua solicitação de depósito foi registrada. Em breve você receberá as instruções para pagamento.",
+          description: `Depósito na carteira`
+        }
       });
 
+      if (error) throw error;
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      // Show QR code or PIX copy-paste code
+      if (data.qr_code) {
+        toast({
+          title: "PIX gerado com sucesso!",
+          description: "Use o código PIX abaixo para realizar o pagamento.",
+        });
+        
+        // You can show the QR code here or redirect to a payment page
+        // For now, we'll show the ticket URL
+        if (data.ticket_url) {
+          window.open(data.ticket_url, '_blank');
+        }
+      }
+
       setAmount("");
-      navigate("/dashboard");
+      fetchWallet(); // Refresh wallet data
+      
     } catch (error) {
-      console.error("Error creating deposit:", error);
+      console.error("Error creating PIX payment:", error);
       toast({
         title: "Erro",
-        description: "Não foi possível processar sua solicitação.",
+        description: error.message || "Não foi possível processar sua solicitação.",
         variant: "destructive",
       });
     } finally {

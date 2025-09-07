@@ -91,61 +91,35 @@ export default function Bet() {
   };
 
   const placeBet = async () => {
-    if (!currentContest || !wallet || selectedNumbers.length !== 25) return;
-
-    if (wallet.balance < 5) {
-      toast({
-        title: "Saldo insuficiente",
-        description: "Você precisa ter pelo menos R$ 5,00 para fazer uma aposta.",
-        variant: "destructive",
-      });
-      return;
-    }
+    if (!currentContest || selectedNumbers.length !== 25) return;
 
     setPlacing(true);
     try {
-      // Deduct from wallet
-      const { error: walletError } = await supabase
-        .from("wallets")
-        .update({ balance: wallet.balance - 5 })
-        .eq("user_id", user!.id);
+      const { data, error } = await supabase.functions.invoke('process-bet', {
+        body: {
+          chosenNumbers: selectedNumbers,
+          contestId: currentContest.id
+        }
+      });
 
-      if (walletError) throw walletError;
+      if (error) throw error;
 
-      // Create bet
-      const { error: betError } = await supabase
-        .from("bets")
-        .insert({
-          user_id: user!.id,
-          contest_id: currentContest.id,
-          chosen_numbers: selectedNumbers,
-          amount: 5,
-        });
-
-      if (betError) throw betError;
-
-      // Create transaction record
-      await supabase
-        .from("transactions")
-        .insert({
-          user_id: user!.id,
-          type: "bet",
-          amount: 5,
-          status: "completed",
-          description: `Aposta no sorteio ${currentContest.month_year}`,
-        });
+      if (data.error) {
+        throw new Error(data.error);
+      }
 
       toast({
         title: "Aposta realizada!",
-        description: "Sua aposta foi registrada com sucesso.",
+        description: data.message || "Sua aposta foi registrada com sucesso.",
       });
 
       navigate("/dashboard");
+      fetchData(); // Refresh data
     } catch (error) {
       console.error("Error placing bet:", error);
       toast({
         title: "Erro",
-        description: "Não foi possível realizar a aposta.",
+        description: error.message || "Não foi possível realizar a aposta.",
         variant: "destructive",
       });
     } finally {

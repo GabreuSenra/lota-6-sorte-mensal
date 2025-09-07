@@ -1,1 +1,26 @@
 project_id = "kuqciqsfoocaygtyhewh"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[functions.create-pix-payment]
+verify_jwt = true
+
+[functions.mercado-pago-webhook]
+verify_jwt = false
+
+[functions.process-withdrawal]
+verify_jwt = true
+
+[functions.process-bet]
+verify_jwt = true
+
+[db]
+enabled = true
+port = 54322
+shadow_port = 54320
+major_version = 15
