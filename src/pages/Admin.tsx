@@ -79,6 +79,24 @@ export default function Admin() {
     }
   };
 
+  useEffect(() => {
+    if (!isAdmin) return;
+    const channel = supabase
+      .channel('withdrawals-admin')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transactions', filter: 'type=eq.withdrawal' }, (payload) => {
+        const record: any = (payload as any).new;
+        if (record?.status === 'pending') {
+          toast({
+            title: 'Novo saque solicitado',
+            description: `R$ ${Number(record.amount).toFixed(2)} aguardando aprovação`,
+          });
+          fetchData();
+        }
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [isAdmin]);
+
   const fetchData = async () => {
     try {
       // Fetch pending withdrawals with profile data
@@ -129,43 +147,16 @@ export default function Admin() {
     }
   };
 
-  const approveWithdrawal = async (withdrawalId: string, amount: number, userId: string) => {
+  const approveWithdrawal = async (withdrawalId: string) => {
     try {
-      // Update transaction status
-      const { error: transactionError } = await supabase
-        .from("transactions")
-        .update({ status: "completed" })
-        .eq("id", withdrawalId);
-
-      if (transactionError) throw transactionError;
-
-      // Get current wallet balance and debit
-      const { data: walletData } = await supabase
-        .from("wallets")
-        .select("balance")
-        .eq("user_id", userId)
-        .single();
-
-      if (walletData && walletData.balance >= amount) {
-        const { error: updateError } = await supabase
-          .from("wallets")
-          .update({ 
-            balance: walletData.balance - amount
-          })
-          .eq("user_id", userId);
-
-        if (updateError) throw updateError;
-      } else {
-        throw new Error("Saldo insuficiente na carteira do usuário");
-      }
-
-      
-
+      const { data, error } = await supabase.functions.invoke('approve-withdrawal', {
+        body: { transactionId: withdrawalId }
+      });
+      if (error) throw error;
       toast({
         title: "Saque aprovado",
-        description: "Saque foi processado e o valor debitado da carteira do usuário.",
+        description: "PIX enviado e carteira atualizada.",
       });
-
       await fetchData();
     } catch (error) {
       console.error("Error approving withdrawal:", error);
@@ -179,18 +170,14 @@ export default function Admin() {
 
   const rejectWithdrawal = async (withdrawalId: string) => {
     try {
-      const { error } = await supabase
-        .from("transactions")
-        .update({ status: "failed" })
-        .eq("id", withdrawalId);
-
+      const { data, error } = await supabase.functions.invoke('reject-withdrawal', {
+        body: { transactionId: withdrawalId }
+      });
       if (error) throw error;
-
       toast({
         title: "Saque rejeitado",
         description: "Solicitação de saque foi rejeitada.",
       });
-
       await fetchData();
     } catch (error) {
       console.error("Error rejecting withdrawal:", error);
@@ -368,7 +355,7 @@ export default function Admin() {
                         <div className="flex gap-2 pt-2">
                           <Button
                             size="sm"
-                            onClick={() => approveWithdrawal(request.id, request.amount, request.user_id)}
+                            onClick={() => approveWithdrawal(request.id)}
                             className="bg-green-600 hover:bg-green-700"
                           >
                             <CheckCircle className="h-4 w-4 mr-1" />

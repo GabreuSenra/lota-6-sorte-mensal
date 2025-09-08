@@ -114,12 +114,27 @@ serve(async (req) => {
       );
     }
 
+    // Notify admins about the new withdrawal request
+    const { error: notifError } = await supabase
+      .from('notifications')
+      .insert({
+        user_id: user.id,
+        target_role: 'admin',
+        type: 'withdrawal_request',
+        title: 'Nova solicitação de saque',
+        message: `Usuário solicitou saque de R$ ${amount.toFixed(2)} para a chave PIX ${profile.pix_key}`,
+        data: { amount, pix_key: profile.pix_key }
+      });
+    if (notifError) {
+      console.warn('Failed to create admin notification:', notifError);
+    }
+
     console.log(`Withdrawal request created for user ${user.id}, amount: ${amount}, PIX: ${profile.pix_key}`);
 
     return new Response(
       JSON.stringify({ 
         success: true,
-        message: 'Withdrawal request created successfully. It will be processed within 24 hours.',
+        message: 'Solicitação de saque criada com sucesso e enviada para aprovação.',
         amount: amount,
         pix_key: profile.pix_key
       }),
