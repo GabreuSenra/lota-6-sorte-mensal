@@ -30,14 +30,14 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/bet" element={<Bet />} />
-            <Route path="/deposit" element={<Deposit />} />
-            <Route path="/withdraw" element={<Withdraw />} />
-            <Route path="/my-bets" element={<MyBets />} />
+            <Route path="/apostar" element={<Bet />} />
+            <Route path="/depositar" element={<Deposit />} />
+            <Route path="/sacar" element={<Withdraw />} />
+            <Route path="/minhas-apostas" element={<MyBets />} />
             <Route path="/admin" element={<Admin />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/responsible-gaming" element={<ResponsibleGaming />} />
-            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/termos" element={<Terms />} />
+            <Route path="/jogo-responsavel" element={<ResponsibleGaming />} />
+            <Route path="/privacidade" element={<Privacy />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Trophy, User, LogIn } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
   isAuthenticated?: boolean;
@@ -7,11 +8,15 @@ interface HeaderProps {
   onDashboardClick?: () => void;
 }
 
+
 export const Header = ({ 
   isAuthenticated = false, 
   onLoginClick, 
   onDashboardClick 
 }: HeaderProps) => {
+
+  const navigate = useNavigate();
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-sm">
       <div className="container flex h-16 items-center justify-between">
@@ -29,7 +34,7 @@ export const Header = ({
           {isAuthenticated ? (
             <Button 
               variant="ghost" 
-              onClick={onDashboardClick}
+              onClick={() => navigate("/dashboard")}
               className="text-foreground"
             >
               <User className="h-4 w-4 mr-2" />

@@ -207,21 +207,21 @@ const Index = () => {
                 <Button 
                   variant="link" 
                   className="p-0 h-auto justify-start text-sm"
-                  onClick={() => navigate("/terms")}
+                  onClick={() => navigate("/termos")}
                 >
                   Termos e Condições
                 </Button>
                 <Button 
                   variant="link" 
                   className="p-0 h-auto justify-start text-sm"
-                  onClick={() => navigate("/responsible-gaming")}
+                  onClick={() => navigate("/jogo-responsavel")}
                 >
                   Jogo Responsável
                 </Button>
                 <Button 
                   variant="link" 
                   className="p-0 h-auto justify-start text-sm"
-                  onClick={() => navigate("/privacy")}
+                  onClick={() => navigate("/privacidade")}
                 >
                   Política de Privacidade
                 </Button>

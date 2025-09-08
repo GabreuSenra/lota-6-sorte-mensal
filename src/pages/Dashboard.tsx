@@ -160,7 +160,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
+    <div className="min-h-screen">
       <Header
         isAuthenticated={!!user}
         onLoginClick={() => navigate("/auth")}
@@ -190,7 +190,7 @@ const Dashboard = () => {
           <Button 
             variant="outline" 
             className="h-24 flex-col"
-            onClick={() => navigate("/bet")}
+            onClick={() => navigate("/apostar")}
           >
             <Gamepad2 className="h-6 w-6 mb-2" />
             Apostar
@@ -198,7 +198,7 @@ const Dashboard = () => {
           <Button 
             variant="outline" 
             className="h-24 flex-col"
-            onClick={() => navigate("/deposit")}
+            onClick={() => navigate("/depositar")}
           >
             <CreditCard className="h-6 w-6 mb-2" />
             Depositar
@@ -206,7 +206,7 @@ const Dashboard = () => {
           <Button 
             variant="outline" 
             className="h-24 flex-col"
-            onClick={() => navigate("/withdraw")}
+            onClick={() => navigate("/sacar")}
           >
             <DollarSign className="h-6 w-6 mb-2" />
             Sacar
@@ -214,7 +214,7 @@ const Dashboard = () => {
           <Button 
             variant="outline" 
             className="h-24 flex-col"
-            onClick={() => navigate("/my-bets")}
+            onClick={() => navigate("/minhas-apostas")}
           >
             <Trophy className="h-6 w-6 mb-2" />
             Minhas Apostas
@@ -237,14 +237,14 @@ const Dashboard = () => {
               <div className="flex gap-2">
                 <Button 
                   size="sm" 
-                  onClick={() => navigate("/deposit")}
+                  onClick={() => navigate("/depositar")}
                 >
                   Depositar
                 </Button>
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => navigate("/withdraw")}
+                  onClick={() => navigate("/sacar")}
                 >
                   Sacar
                 </Button>
@@ -351,7 +351,7 @@ const Dashboard = () => {
               <Button 
                 variant="ghost" 
                 className="justify-start h-auto p-4"
-                onClick={() => navigate("/terms")}
+                onClick={() => navigate("/termos")}
               >
                 <div className="text-left">
                   <div className="font-medium">Termos e Condições</div>
@@ -361,7 +361,7 @@ const Dashboard = () => {
               <Button 
                 variant="ghost" 
                 className="justify-start h-auto p-4"
-                onClick={() => navigate("/responsible-gaming")}
+                onClick={() => navigate("/jogo-responsavel")}
               >
                 <div className="text-left">
                   <div className="font-medium">Jogo Responsável</div>
@@ -371,7 +371,7 @@ const Dashboard = () => {
               <Button 
                 variant="ghost" 
                 className="justify-start h-auto p-4"
-                onClick={() => navigate("/privacy")}
+                onClick={() => navigate("/privacidade")}
               >
                 <div className="text-left">
                   <div className="font-medium">Privacidade</div>

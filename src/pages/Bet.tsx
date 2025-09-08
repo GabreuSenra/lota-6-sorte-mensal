@@ -33,7 +33,7 @@ export default function Bet() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
-  
+
   const [currentContest, setCurrentContest] = useState<Contest | null>(null);
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [existingBet, setExistingBet] = useState<Bet | null>(null);
@@ -159,9 +159,17 @@ export default function Bet() {
 
   if (!currentContest) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
+      <div className="min-h-screen bg-gradient-to-br from-green-500 to-black-500">
         <Header isAuthenticated={!!user} />
         <div className="container mx-auto p-4">
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/dashboard")}
+            className="mb-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Voltar
+          </Button>
           <Alert>
             <AlertDescription>
               Não há sorteios abertos no momento.
@@ -185,7 +193,7 @@ export default function Bet() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Voltar
           </Button>
-          
+
           <Alert>
             <AlertDescription>
               Você já possui uma aposta neste sorteio. Números escolhidos: {existingBet.chosen_numbers.join(", ")}
@@ -199,7 +207,7 @@ export default function Bet() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
       <Header isAuthenticated={!!user} />
-      
+
       <div className="container mx-auto p-4">
         <Button
           variant="ghost"
@@ -263,7 +271,7 @@ export default function Bet() {
               onNumberSelect={setSelectedNumbers}
               maxNumbers={6}
             />
-            
+
             <div className="mt-6 flex justify-between items-center">
               <p className="text-sm text-muted-foreground">
                 Valor da aposta: R$ 5,00
