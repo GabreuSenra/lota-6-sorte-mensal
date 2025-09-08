@@ -36,7 +36,6 @@ export default function Bet() {
 
   const [currentContest, setCurrentContest] = useState<Contest | null>(null);
   const [wallet, setWallet] = useState<Wallet | null>(null);
-  const [existingBet, setExistingBet] = useState<Bet | null>(null);
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
   const [placing, setPlacing] = useState(false);
@@ -72,17 +71,6 @@ export default function Bet() {
 
       setWallet(walletData);
 
-      // Check for existing bet
-      if (contests && contests.length > 0) {
-        const { data: betData } = await supabase
-          .from("bets")
-          .select("id, chosen_numbers")
-          .eq("contest_id", contests[0].id)
-          .eq("user_id", user!.id)
-          .single();
-
-        setExistingBet(betData);
-      }
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -93,52 +81,31 @@ export default function Bet() {
   const placeBet = async () => {
     if (!currentContest || !wallet || selectedNumbers.length !== 6) return;
 
-    if (wallet.balance < 5) {
-      toast({
-        title: "Saldo insuficiente",
-        description: "Você precisa ter pelo menos R$ 5,00 para fazer uma aposta.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setPlacing(true);
     try {
-      // Deduct from wallet
-      const { error: walletError } = await supabase
-        .from("wallets")
-        .update({ balance: wallet.balance - 5 })
-        .eq("user_id", user!.id);
-
-      if (walletError) throw walletError;
-
-      // Create bet
-      const { error: betError } = await supabase
-        .from("bets")
-        .insert({
-          user_id: user!.id,
-          contest_id: currentContest.id,
-          chosen_numbers: selectedNumbers,
-          amount: 5,
-        });
-
-      if (betError) throw betError;
-
-      // Create transaction record
-      await supabase
-        .from("transactions")
-        .insert({
-          user_id: user!.id,
-          type: "bet",
-          amount: 5,
-          status: "completed",
-          description: `Aposta no sorteio ${currentContest.month_year}`,
-        });
-
-      toast({
-        title: "Aposta realizada!",
-        description: "Sua aposta foi registrada com sucesso.",
+      // Chama a Edge Function 'process-bet'
+      const { data, error } = await supabase.functions.invoke("process-bet", {
+        method: "POST",
+        body: JSON.stringify({
+          contestId: currentContest.id,
+          chosenNumbers: selectedNumbers
+        }),
       });
+
+      if (!error) {
+        toast({
+          title: "Aposta realizada!",
+          description: "Sua aposta foi registrada com sucesso.",
+        });
+      }
+      else{
+        toast({
+          title: "Erro",
+          description: "Sua aposta não pode ser realizada!",
+          variant: "destructive",
+      });
+
+      }
 
       navigate("/dashboard");
     } catch (error) {
@@ -157,6 +124,7 @@ export default function Bet() {
     return <div className="container mx-auto p-4">Carregando...</div>;
   }
 
+  //verifica se existe algum sorteio aberto, se não existir, mostra uma mensagem
   if (!currentContest) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-500 to-black-500">
@@ -180,32 +148,8 @@ export default function Bet() {
     );
   }
 
-  if (existingBet) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
-        <Header isAuthenticated={!!user} />
-        <div className="container mx-auto p-4">
-          <Button
-            variant="ghost"
-            onClick={() => navigate("/dashboard")}
-            className="mb-4"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Voltar
-          </Button>
-
-          <Alert>
-            <AlertDescription>
-              Você já possui uma aposta neste sorteio. Números escolhidos: {existingBet.chosen_numbers.join(", ")}
-            </AlertDescription>
-          </Alert>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-green-500 to-black-500">
       <Header isAuthenticated={!!user} />
 
       <div className="container mx-auto p-4">

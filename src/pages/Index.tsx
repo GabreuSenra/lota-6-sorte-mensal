@@ -42,7 +42,7 @@ const Index = () => {
               <div className="space-y-4">
                 <h1 className="text-5xl lg:text-6xl font-bold text-foreground">
                   <span className="bg-gradient-lucky bg-clip-text text-transparent">
-                    Lota 6 Sorte
+                    Credimania
                   </span>
                 </h1>
                 <h2 className="text-2xl lg:text-3xl font-semibold text-secondary">
@@ -207,21 +207,21 @@ const Index = () => {
                 <Button 
                   variant="link" 
                   className="p-0 h-auto justify-start text-sm"
-                  onClick={() => navigate("/termos")}
+                  onClick={() => window.open('/termos', '_blank', 'noopener noreferrer')}
                 >
                   Termos e Condições
                 </Button>
                 <Button 
                   variant="link" 
                   className="p-0 h-auto justify-start text-sm"
-                  onClick={() => navigate("/jogo-responsavel")}
+                  onClick={() => window.open('/jogo-responsavel', '_blank', 'noopener noreferrer')}
                 >
                   Jogo Responsável
                 </Button>
                 <Button 
                   variant="link" 
                   className="p-0 h-auto justify-start text-sm"
-                  onClick={() => navigate("/privacidade")}
+                  onClick={() => window.open('/privacidade', '_blank', 'noopener noreferrer')}
                 >
                   Política de Privacidade
                 </Button>

@@ -11,19 +11,10 @@ export default function ResponsibleGaming() {
   const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
+    <div className="min-h-screen">
       <Header isAuthenticated={!!user} />
       
       <div className="container mx-auto p-4">
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/")}
-          className="mb-4"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Voltar
-        </Button>
-
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">

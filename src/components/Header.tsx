@@ -24,7 +24,7 @@ export const Header = ({
           <Trophy className="h-8 w-8 text-secondary" />
           <div className="flex flex-col">
             <h1 className="text-xl font-bold bg-gradient-lucky bg-clip-text text-transparent">
-              Lota 6 Sorte
+              Credimania
             </h1>
             <span className="text-xs text-muted-foreground">Bolão Mensal</span>
           </div>

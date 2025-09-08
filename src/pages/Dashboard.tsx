@@ -11,13 +11,22 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-interface Profile { 
-  id: string; 
-  user_id: string; 
-  full_name: string | null; 
-  cpf: string | null; 
-  phone: string | null; 
-  pix_key: string | null; 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+
+interface Profile {
+  id: string;
+  user_id: string;
+  full_name: string | null;
+  cpf: string | null;
+  phone: string | null;
+  pix_key: string | null;
   role: string;
 }
 
@@ -42,13 +51,16 @@ const Dashboard = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
-  const [profileForm, setProfileForm] = useState({ 
-    full_name: "", 
-    cpf: "", 
-    phone: "", 
-    pix_key: "" 
+  const [profileForm, setProfileForm] = useState({
+    full_name: "",
+    cpf: "",
+    phone: "",
+    pix_key: ""
   });
   const [savingProfile, setSavingProfile] = useState(false);
+
+  const [showWarning, setShowWarning] = useState(false);
+  const [pendingSave, setPendingSave] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) navigate("/auth");
@@ -75,7 +87,7 @@ const Dashboard = () => {
         setProfile(profileData);
         setProfileForm({
           full_name: profileData.full_name || "",
-          cpf: profileData.cpf || "",
+          cpf: profileData.cpf ? formatCPF(profileData.cpf) : "",
           phone: profileData.phone || "",
           pix_key: profileData.pix_key || "",
         });
@@ -104,13 +116,66 @@ const Dashboard = () => {
     }
   };
 
+  const cpfRegex = /^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/;
+  const phoneRegex = /^\(?\d{2}\)?\s?(?:9\d{4}|\d{4})-?\d{4}$/;
+
+  // Função para limpar só números
+  function cleanNumbers(value: string) {
+    return value.replace(/\D/g, "");
+  }
+
+  // Formata CPF -> 000.000.000-00
+  function formatCPF(value: string) {
+    return value
+      .replace(/\D/g, "") // tira tudo que não é número
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+  }
+
+  // Formata Telefone -> (00) 90000-0000
+  function formatPhone(value: string) {
+    return value
+      .replace(/\D/g, "")
+      .replace(/^(\d{2})(\d)/, "($1) $2")
+      .replace(/(\d{5})(\d)/, "$1-$2")
+      .slice(0, 15); // limita ao tamanho
+  }
+
   const saveProfile = async () => {
     if (!user) return;
+
+    // valida CPF
+    if (profileForm.cpf && !cpfRegex.test(profileForm.cpf)) {
+      toast({
+        title: "CPF inválido",
+        description: "Digite um CPF válido (000.000.000-00).",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // valida Telefone
+    if (profileForm.phone && !phoneRegex.test(profileForm.phone)) {
+      toast({
+        title: "Telefone inválido",
+        description: "Digite um telefone válido, ex: (11) 91234-5678.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const profileToSave = {
+      ...profileForm,
+      cpf: profileForm.cpf ? cleanNumbers(profileForm.cpf) : null,
+      phone: profileForm.phone ? cleanNumbers(profileForm.phone) : null,
+    };
+
     setSavingProfile(true);
     try {
       const { error } = await supabase
         .from("profiles")
-        .update(profileForm)
+        .update(profileToSave)
         .eq("user_id", user.id);
 
       if (error) throw error;
@@ -135,7 +200,7 @@ const Dashboard = () => {
   const getTransactionColor = (type: string, status: string) => {
     if (status === "pending") return "bg-yellow-100 text-yellow-800";
     if (status === "rejected") return "bg-red-100 text-red-800";
-    
+
     switch (type) {
       case "deposit": return "bg-green-100 text-green-800";
       case "withdrawal": return "bg-blue-100 text-blue-800";
@@ -172,8 +237,8 @@ const Dashboard = () => {
           <h1 className="text-3xl font-bold text-foreground">Minha Conta</h1>
           <div className="flex gap-2">
             {profile?.role === "admin" && (
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={() => navigate("/admin")}
               >
@@ -187,32 +252,32 @@ const Dashboard = () => {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="h-24 flex-col"
             onClick={() => navigate("/apostar")}
           >
             <Gamepad2 className="h-6 w-6 mb-2" />
             Apostar
           </Button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="h-24 flex-col"
             onClick={() => navigate("/depositar")}
           >
             <CreditCard className="h-6 w-6 mb-2" />
             Depositar
           </Button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="h-24 flex-col"
             onClick={() => navigate("/sacar")}
           >
             <DollarSign className="h-6 w-6 mb-2" />
             Sacar
           </Button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="h-24 flex-col"
             onClick={() => navigate("/minhas-apostas")}
           >
@@ -235,14 +300,14 @@ const Dashboard = () => {
                 R$ {wallet?.balance.toFixed(2) || "0,00"}
               </div>
               <div className="flex gap-2">
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   onClick={() => navigate("/depositar")}
                 >
                   Depositar
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   onClick={() => navigate("/sacar")}
                 >
@@ -272,11 +337,10 @@ const Dashboard = () => {
                           {new Date(transaction.created_at).toLocaleDateString('pt-BR')}
                         </p>
                       </div>
-                      <span className={`font-medium ${
-                        transaction.type === 'withdrawal' || transaction.type === 'bet' 
-                          ? 'text-red-600' 
-                          : 'text-green-600'
-                      }`}>
+                      <span className={`font-medium ${transaction.type === 'withdrawal' || transaction.type === 'bet'
+                        ? 'text-red-600'
+                        : 'text-green-600'
+                        }`}>
                         {transaction.type === 'withdrawal' || transaction.type === 'bet' ? '-' : '+'}
                         R$ {transaction.amount.toFixed(2)}
                       </span>
@@ -296,42 +360,61 @@ const Dashboard = () => {
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="full_name">Nome completo</Label>
-              <Input 
-                id="full_name" 
-                value={profileForm.full_name} 
-                onChange={(e) => setProfileForm(v => ({ ...v, full_name: e.target.value }))} 
-                placeholder="Ex: Maria Silva" 
+              <Input
+                id="full_name"
+                value={profileForm.full_name}
+                onChange={(e) => setProfileForm(v => ({ ...v, full_name: e.target.value }))}
+                placeholder="Ex: Maria Silva"
+                disabled={!!profile?.full_name}
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="cpf">CPF</Label>
-              <Input 
-                id="cpf" 
-                value={profileForm.cpf} 
-                onChange={(e) => setProfileForm(v => ({ ...v, cpf: e.target.value }))} 
-                placeholder="000.000.000-00" 
+              <Input
+                id="cpf"
+                value={profileForm.cpf}
+                onChange={(e) => {
+                  const formatted = formatCPF(e.target.value);
+                  setProfileForm(v => ({ ...v, cpf: formatted }));
+                }}
+                placeholder="000.000.000-00"
+                disabled={!!profile?.cpf}
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone">Telefone</Label>
-              <Input 
-                id="phone" 
-                value={profileForm.phone} 
-                onChange={(e) => setProfileForm(v => ({ ...v, phone: e.target.value }))} 
-                placeholder="(00) 90000-0000" 
+              <Input
+                id="phone"
+                value={profileForm.phone}
+                onChange={(e) => {
+                  const formatted = formatPhone(e.target.value);
+                  setProfileForm(v => ({ ...v, phone: formatted }));
+                }}
+                placeholder="(00) 90000-0000"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="pix_key">Chave PIX</Label>
-              <Input 
-                id="pix_key" 
-                value={profileForm.pix_key} 
-                onChange={(e) => setProfileForm(v => ({ ...v, pix_key: e.target.value }))} 
-                placeholder="CPF/E-mail/Celular/Random" 
+              <Input
+                id="pix_key"
+                value={profileForm.pix_key}
+                onChange={(e) => setProfileForm(v => ({ ...v, pix_key: e.target.value }))}
+                placeholder="CPF/E-mail/Celular/Random"
               />
             </div>
             <div className="md:col-span-2">
-              <Button onClick={saveProfile} disabled={savingProfile}>
+              <Button
+                onClick={() => {
+                  if (!profile?.cpf || !profile?.full_name) {
+                    // Se ainda não existe CPF ou nome no banco, mostra aviso
+                    setShowWarning(true);
+                  } else {
+                    // Se já existe, salva direto
+                    saveProfile();
+                  }
+                }}
+                disabled={savingProfile}
+              >
                 {savingProfile ? "Salvando..." : "Salvar Perfil"}
               </Button>
             </div>
@@ -348,30 +431,30 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 className="justify-start h-auto p-4"
-                onClick={() => navigate("/termos")}
+                onClick={() => window.open('/termos', '_blank', 'noopener noreferrer')}
               >
                 <div className="text-left">
                   <div className="font-medium">Termos e Condições</div>
                   <div className="text-sm text-muted-foreground">Regras do bolão</div>
                 </div>
               </Button>
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 className="justify-start h-auto p-4"
-                onClick={() => navigate("/jogo-responsavel")}
+                onClick={() => window.open('/jogo-responsavel', '_blank', 'noopener noreferrer')}
               >
                 <div className="text-left">
                   <div className="font-medium">Jogo Responsável</div>
                   <div className="text-sm text-muted-foreground">Joghe com consciência</div>
                 </div>
               </Button>
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 className="justify-start h-auto p-4"
-                onClick={() => navigate("/privacidade")}
+                onClick={() => window.open('/privacidade', '_blank', 'noopener noreferrer')}
               >
                 <div className="text-left">
                   <div className="font-medium">Privacidade</div>
@@ -382,6 +465,33 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={showWarning} onOpenChange={setShowWarning}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Atenção</DialogTitle>
+            <DialogDescription>
+              Verifique cuidadosamente o <strong>Nome completo</strong> e o <strong>CPF</strong>.
+              <br />
+              Esses dados <span className="text-red-600 font-bold">não poderão ser alterados posteriormente</span>.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowWarning(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => {
+                setShowWarning(false);
+                saveProfile();
+              }}
+            >
+              Confirmar e Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 };

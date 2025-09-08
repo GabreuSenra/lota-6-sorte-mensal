@@ -21,7 +21,7 @@ interface Bet {
     month_year: string;
     draw_date: string;
     status: string;
-    lotomania_numbers: number[] | null;
+    winning_numbers: number[] | null;
   };
 }
 
@@ -50,7 +50,7 @@ export default function MyBets() {
             month_year,
             draw_date,
             status,
-            lotomania_numbers
+            winning_numbers
           )
         `)
         .eq("user_id", user!.id)
@@ -157,13 +157,13 @@ export default function MyBets() {
                       </div>
                     </div>
 
-                    {bet.contest.lotomania_numbers && (
+                    {bet.contest.winning_numbers && (
                       <div>
                         <h4 className="font-medium text-sm text-muted-foreground mb-2">
                           Números sorteados:
                         </h4>
                         <div className="flex flex-wrap gap-2">
-                          {bet.contest.lotomania_numbers.sort((a, b) => a - b).map((number) => {
+                          {bet.contest.winning_numbers.sort((a, b) => a - b).map((number) => {
                             const isHit = bet.chosen_numbers.includes(number);
                             return (
                               <span

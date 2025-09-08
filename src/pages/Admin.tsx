@@ -38,7 +38,7 @@ export default function Admin() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
-  
+
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [withdrawRequests, setWithdrawRequests] = useState<WithdrawRequest[]>([]);
@@ -61,14 +61,14 @@ export default function Admin() {
   const checkAdminStatus = async () => {
     try {
       const { data, error } = await supabase.rpc('is_admin');
-      
+
       if (error) throw error;
-      
+
       if (!data) {
         navigate("/dashboard");
         return;
       }
-      
+
       setIsAdmin(true);
       await fetchData();
     } catch (error) {
@@ -194,7 +194,7 @@ export default function Admin() {
 
     try {
       const numbers = winningNumbers.split(",").map(n => parseInt(n.trim()));
-      
+
       if (numbers.length !== 6 || numbers.some(n => isNaN(n) || n < 0 || n > 99)) {
         toast({
           title: "Erro",
@@ -206,7 +206,7 @@ export default function Admin() {
 
       const { error } = await supabase
         .from("contests")
-        .update({ 
+        .update({
           status: "closed",
           winning_numbers: numbers
         })
@@ -293,7 +293,7 @@ export default function Admin() {
   return (
     <div className="min-h-screen ">
       <Header isAuthenticated={!!user} />
-      
+
       <div className="container mx-auto p-4">
         <Button
           variant="ghost"
@@ -379,7 +379,7 @@ export default function Admin() {
           </TabsContent>
 
           <TabsContent value="contests">
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="grid gap-6 md:grid-cols-1">
               {currentContest && (
                 <Card>
                   <CardHeader>
@@ -406,8 +406,7 @@ export default function Admin() {
                   </CardContent>
                 </Card>
               )}
-
-              <Card>
+              {!currentContest && (<Card>
                 <CardHeader>
                   <CardTitle>Criar Novo Sorteio</CardTitle>
                   <CardDescription>
@@ -416,34 +415,34 @@ export default function Admin() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium">Mês/Ano</label>
+                    <label className="text-sm font-medium">Nome do novo Sorteio</label>
                     <Input
-                      placeholder="Ex: Janeiro 2024"
+                      placeholder="Ex: Janeiro 2026"
                       value={newContestData.monthYear}
-                      onChange={(e) => setNewContestData({...newContestData, monthYear: e.target.value})}
+                      onChange={(e) => setNewContestData({ ...newContestData, monthYear: e.target.value })}
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Data do Sorteio</label>
+                    <label className="text-sm font-medium">Data de abertuda do novo Sorteio</label>
                     <Input
                       type="date"
                       value={newContestData.drawDate}
-                      onChange={(e) => setNewContestData({...newContestData, drawDate: e.target.value})}
+                      onChange={(e) => setNewContestData({ ...newContestData, drawDate: e.target.value })}
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Data de Encerramento</label>
+                    <label className="text-sm font-medium">Data e hora de Encerramento do novo Sorteio</label>
                     <Input
                       type="datetime-local"
                       value={newContestData.closingDate}
-                      onChange={(e) => setNewContestData({...newContestData, closingDate: e.target.value})}
+                      onChange={(e) => setNewContestData({ ...newContestData, closingDate: e.target.value })}
                     />
                   </div>
                   <Button onClick={createNewContest} className="w-full">
                     Criar Sorteio
                   </Button>
                 </CardContent>
-              </Card>
+              </Card>)}
             </div>
           </TabsContent>
         </Tabs>
