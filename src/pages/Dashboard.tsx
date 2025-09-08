@@ -172,7 +172,11 @@ const Dashboard = () => {
           <h1 className="text-3xl font-bold text-foreground">Minha Conta</h1>
           <div className="flex gap-2">
             {profile?.role === "admin" && (
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate("/admin")}
+              >
                 <Settings className="h-4 w-4 mr-2" />
                 Admin
               </Button>

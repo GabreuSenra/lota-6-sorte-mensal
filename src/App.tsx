@@ -11,6 +11,7 @@ import Bet from "./pages/Bet";
 import Deposit from "./pages/Deposit";
 import Withdraw from "./pages/Withdraw";
 import MyBets from "./pages/MyBets";
+import Admin from "./pages/Admin";
 import Terms from "./pages/Terms";
 import ResponsibleGaming from "./pages/ResponsibleGaming";
 import Privacy from "./pages/Privacy";
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/deposit" element={<Deposit />} />
             <Route path="/withdraw" element={<Withdraw />} />
             <Route path="/my-bets" element={<MyBets />} />
+            <Route path="/admin" element={<Admin />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/responsible-gaming" element={<ResponsibleGaming />} />
             <Route path="/privacy" element={<Privacy />} />

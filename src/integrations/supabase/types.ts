@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      administrators: {
+        Row: {
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bets: {
         Row: {
           amount: number
@@ -79,6 +100,7 @@ export type Database = {
           status: string
           total_collected: number | null
           updated_at: string
+          winning_numbers: number[] | null
         }
         Insert: {
           admin_fee_percentage?: number | null
@@ -91,6 +113,7 @@ export type Database = {
           status?: string
           total_collected?: number | null
           updated_at?: string
+          winning_numbers?: number[] | null
         }
         Update: {
           admin_fee_percentage?: number | null
@@ -103,6 +126,7 @@ export type Database = {
           status?: string
           total_collected?: number | null
           updated_at?: string
+          winning_numbers?: number[] | null
         }
         Relationships: []
       }
@@ -148,6 +172,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          payment_id: string | null
           status: string
           type: string
           updated_at: string
@@ -158,6 +183,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          payment_id?: string | null
           status?: string
           type: string
           updated_at?: string
@@ -168,6 +194,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          payment_id?: string | null
           status?: string
           type?: string
           updated_at?: string
@@ -204,7 +231,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: {
+        Args: { user_uuid?: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

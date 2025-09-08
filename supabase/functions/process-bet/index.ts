@@ -16,9 +16,9 @@ serve(async (req) => {
     const { chosenNumbers, contestId } = await req.json();
     
     // Validate input
-    if (!chosenNumbers || !Array.isArray(chosenNumbers) || chosenNumbers.length !== 25) {
+    if (!chosenNumbers || !Array.isArray(chosenNumbers) || chosenNumbers.length !== 6) {
       return new Response(
-        JSON.stringify({ error: 'You must choose exactly 25 numbers' }),
+        JSON.stringify({ error: 'Deve escolher exatamente 6 números' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -37,16 +37,16 @@ serve(async (req) => {
 
     if (!validNumbers) {
       return new Response(
-        JSON.stringify({ error: 'All numbers must be between 00 and 99' }),
+        JSON.stringify({ error: 'Números devem ser únicos e entre 0 e 99' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     // Check for duplicates
     const uniqueNumbers = [...new Set(chosenNumbers)];
-    if (uniqueNumbers.length !== 25) {
+    if (uniqueNumbers.length !== 6) {
       return new Response(
-        JSON.stringify({ error: 'Numbers must be unique' }),
+        JSON.stringify({ error: 'Números devem ser únicos' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -190,15 +190,16 @@ serve(async (req) => {
     }
 
     // Update contest total collected
+    const { data: currentContest } = await supabase
+      .from('contests')
+      .select('total_collected')
+      .eq('id', contestId)
+      .single();
+
     await supabase
       .from('contests')
       .update({ 
-        total_collected: (await supabase
-          .from('contests')
-          .select('total_collected')
-          .eq('id', contestId)
-          .single()
-        ).data?.total_collected + betAmount || betAmount
+        total_collected: (currentContest?.total_collected || 0) + betAmount
       })
       .eq('id', contestId);
 
