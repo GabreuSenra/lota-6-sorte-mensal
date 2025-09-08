@@ -91,35 +91,61 @@ export default function Bet() {
   };
 
   const placeBet = async () => {
-    if (!currentContest || selectedNumbers.length !== 25) return;
+    if (!currentContest || !wallet || selectedNumbers.length !== 6) return;
+
+    if (wallet.balance < 5) {
+      toast({
+        title: "Saldo insuficiente",
+        description: "Você precisa ter pelo menos R$ 5,00 para fazer uma aposta.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setPlacing(true);
     try {
-      const { data, error } = await supabase.functions.invoke('process-bet', {
-        body: {
-          chosenNumbers: selectedNumbers,
-          contestId: currentContest.id
-        }
-      });
+      // Deduct from wallet
+      const { error: walletError } = await supabase
+        .from("wallets")
+        .update({ balance: wallet.balance - 5 })
+        .eq("user_id", user!.id);
 
-      if (error) throw error;
+      if (walletError) throw walletError;
 
-      if (data.error) {
-        throw new Error(data.error);
-      }
+      // Create bet
+      const { error: betError } = await supabase
+        .from("bets")
+        .insert({
+          user_id: user!.id,
+          contest_id: currentContest.id,
+          chosen_numbers: selectedNumbers,
+          amount: 5,
+        });
+
+      if (betError) throw betError;
+
+      // Create transaction record
+      await supabase
+        .from("transactions")
+        .insert({
+          user_id: user!.id,
+          type: "bet",
+          amount: 5,
+          status: "completed",
+          description: `Aposta no sorteio ${currentContest.month_year}`,
+        });
 
       toast({
         title: "Aposta realizada!",
-        description: data.message || "Sua aposta foi registrada com sucesso.",
+        description: "Sua aposta foi registrada com sucesso.",
       });
 
       navigate("/dashboard");
-      fetchData(); // Refresh data
     } catch (error) {
       console.error("Error placing bet:", error);
       toast({
         title: "Erro",
-        description: error.message || "Não foi possível realizar a aposta.",
+        description: "Não foi possível realizar a aposta. ",
         variant: "destructive",
       });
     } finally {
@@ -226,16 +252,16 @@ export default function Bet() {
 
         <Card className="mt-6">
           <CardHeader>
-            <CardTitle>Escolha seus 25 números</CardTitle>
+            <CardTitle>Escolha seus 6 números</CardTitle>
             <CardDescription>
-              Selecione exatamente 25 números de 00 a 99 para participar do sorteio
+              Selecione exatamente 6 números de 00 a 99 para participar do sorteio
             </CardDescription>
           </CardHeader>
           <CardContent>
             <NumberPicker
               selectedNumbers={selectedNumbers}
               onNumberSelect={setSelectedNumbers}
-              maxNumbers={25}
+              maxNumbers={6}
             />
             
             <div className="mt-6 flex justify-between items-center">
@@ -244,7 +270,7 @@ export default function Bet() {
               </p>
               <Button
                 onClick={placeBet}
-                disabled={selectedNumbers.length !== 25 || placing || !wallet || wallet.balance < 5}
+                disabled={selectedNumbers.length !== 6 || placing || !wallet || wallet.balance < 5}
                 size="lg"
               >
                 {placing ? "Processando..." : "Apostar R$ 5,00"}
