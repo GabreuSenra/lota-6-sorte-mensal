@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Trophy, User, LogIn } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import icon from "../../public/icon.png";
 
 interface HeaderProps {
   isAuthenticated?: boolean;
@@ -8,32 +9,33 @@ interface HeaderProps {
   onDashboardClick?: () => void;
 }
 
-
-export const Header = ({ 
-  isAuthenticated = false, 
-  onLoginClick, 
-  onDashboardClick 
+export const Header = ({
+  isAuthenticated = false,
+  onLoginClick,
+  onDashboardClick
 }: HeaderProps) => {
 
   const navigate = useNavigate();
 
+  const navigateToHomepage = () => {
+    navigate("/");
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-sm">
-      <div className="container flex h-16 items-center justify-between">
+      <div className="container flex h-24 items-center justify-between">
         <div className="flex items-center space-x-2">
-          <Trophy className="h-8 w-8 text-secondary" />
-          <div className="flex flex-col">
-            <h1 className="text-xl font-bold bg-gradient-lucky bg-clip-text text-transparent">
-              Credimania
-            </h1>
-            <span className="text-xs text-muted-foreground">Bolão Mensal</span>
-          </div>
+          <img
+            src={icon}
+            onClick={navigateToHomepage}
+            className="h-24 w-24 text-secondary transition-transform transform hover:scale-110 duration-200 ease-in-out"
+          />
         </div>
 
         <nav className="flex items-center space-x-4">
           {isAuthenticated ? (
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               onClick={() => navigate("/dashboard")}
               className="text-foreground"
             >
@@ -41,8 +43,8 @@ export const Header = ({
               Minha Conta
             </Button>
           ) : (
-            <Button 
-              variant="hero" 
+            <Button
+              variant="hero"
               onClick={onLoginClick}
               size="sm"
             >
