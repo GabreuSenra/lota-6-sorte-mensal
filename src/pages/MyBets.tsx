@@ -8,6 +8,7 @@ import { ArrowLeft, Trophy, Calendar } from "lucide-react";
 import { Header } from "@/components/Header";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { set } from "date-fns";
 
 interface Bet {
   id: string;
@@ -28,21 +29,31 @@ interface Bet {
 export default function MyBets() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  
+
   const [bets, setBets] = useState<Bet[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(6);
+  const [totalCount, setTotalCount] = useState(0);
+
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   useEffect(() => {
     if (!user) {
       navigate("/auth");
       return;
     }
-    fetchBets();
-  }, [user, navigate]);
+    fetchBets(page, pageSize);
+  }, [user, navigate, page]);
 
-  const fetchBets = async () => {
+  const fetchBets = async (page: number, pageSize: number) => {
     try {
-      const { data: betsData, error } = await supabase
+
+      const start = (page - 1) * pageSize;
+      const end = start + pageSize - 1;
+
+      const { data: betsData, error, count } = await supabase
         .from("bets")
         .select(`
           *,
@@ -52,12 +63,15 @@ export default function MyBets() {
             status,
             winning_numbers
           )
-        `)
+        `, { count: 'exact' })
         .eq("user_id", user!.id)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .range(start, end);
+
 
       if (error) throw error;
       setBets(betsData || []);
+      setTotalCount(count || 0);
     } catch (error) {
       console.error("Error fetching bets:", error);
     } finally {
@@ -90,7 +104,7 @@ export default function MyBets() {
   return (
     <div className="min-h-screen">
       <Header isAuthenticated={!!user} />
-      
+
       <div className="container mx-auto p-4">
         <Button
           variant="ghost"
@@ -109,9 +123,9 @@ export default function MyBets() {
         {bets.length === 0 ? (
           <Alert>
             <AlertDescription>
-              Você ainda não fez nenhuma aposta. 
-              <Button 
-                variant="link" 
+              Você ainda não fez nenhuma aposta.
+              <Button
+                variant="link"
                 className="p-0 h-auto ml-1"
                 onClick={() => navigate("/bet")}
               >
@@ -168,11 +182,10 @@ export default function MyBets() {
                             return (
                               <span
                                 key={number}
-                                className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${
-                                  isHit 
-                                    ? "bg-green-500 text-white" 
+                                className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${isHit
+                                    ? "bg-green-500 text-white"
                                     : "bg-gray-200 text-gray-700"
-                                }`}
+                                  }`}
                               >
                                 {number.toString().padStart(2, '0')}
                               </span>
@@ -187,7 +200,7 @@ export default function MyBets() {
                         <span className="text-muted-foreground">Valor apostado: </span>
                         <span className="font-medium">R$ {bet.amount.toFixed(2)}</span>
                       </div>
-                      
+
                       {bet.hits !== null && (
                         <div className="text-sm">
                           <span className="text-muted-foreground">Acertos: </span>
@@ -217,7 +230,29 @@ export default function MyBets() {
             ))}
           </div>
         )}
+
+        <div className="flex justify-between mt-4">
+          <Button
+            onClick={() => setPage((prev) => prev - 1)}
+            disabled={page === 1}
+          >
+            Anterior
+          </Button>
+
+          <span>Página {page} de {totalPages}</span>
+
+          <Button
+            onClick={() => setPage((prev) => prev + 1)}
+            disabled={page === totalPages}
+          >
+            Próxima
+          </Button>
+        </div>
+
       </div>
+
+
+
     </div>
   );
 }

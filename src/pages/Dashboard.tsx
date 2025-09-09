@@ -108,7 +108,7 @@ const Dashboard = () => {
         .select("*")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
-        .limit(5);
+        .limit(2);
 
       setRecentTransactions(transactionsData || []);
     } catch (error) {
@@ -320,7 +320,13 @@ const Dashboard = () => {
           {/* Transações Recentes */}
           <Card>
             <CardHeader>
-              <CardTitle>Transações Recentes</CardTitle>
+              <div className="flex ">
+                <CardTitle>Transações Recentes</CardTitle>
+                <Button className="ml-auto" 
+                  onClick={() => navigate("/transacoes")}>
+                  Ver minhas Transações
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               {recentTransactions.length === 0 ? (
@@ -448,7 +454,7 @@ const Dashboard = () => {
               >
                 <div className="text-left">
                   <div className="font-medium">Jogo Responsável</div>
-                  <div className="text-sm text-muted-foreground">Joghe com consciência</div>
+                  <div className="text-sm text-muted-foreground">Jogue com consciência</div>
                 </div>
               </Button>
               <Button

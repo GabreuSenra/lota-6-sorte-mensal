@@ -15,6 +15,7 @@ import Admin from "./pages/Admin";
 import Terms from "./pages/Terms";
 import ResponsibleGaming from "./pages/ResponsibleGaming";
 import Privacy from "./pages/Privacy";
+import Transactions from "./pages/Transactions";
 import { AuthProvider } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
@@ -38,7 +39,7 @@ const App = () => (
             <Route path="/termos" element={<Terms />} />
             <Route path="/jogo-responsavel" element={<ResponsibleGaming />} />
             <Route path="/privacidade" element={<Privacy />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="/transacoes" element={<Transactions />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

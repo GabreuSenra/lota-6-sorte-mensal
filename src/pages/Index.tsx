@@ -14,7 +14,6 @@ const Index = () => {
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
   const [showNumberPicker, setShowNumberPicker] = useState(false);
   const [currentContest, setCurrentContest] = useState<any>(null);
-  const [totalBets, setTotalBets] = useState(0);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -33,14 +32,6 @@ const Index = () => {
 
       if (contest) {
         setCurrentContest(contest);
-        
-        // Count total bets for this contest
-        const { count } = await supabase
-          .from('bets')
-          .select('*', { count: 'exact', head: true })
-          .eq('contest_id', contest.id);
-
-        setTotalBets(count || 0);
       }
     } catch (error) {
       console.error('Error fetching contest data:', error);
@@ -125,7 +116,7 @@ const Index = () => {
                   <Card className="bg-gradient-card border-border shadow-glow">
                     <CardContent className="p-6 text-center">
                       <Users className="h-8 w-8 text-accent mx-auto mb-2" />
-                      <div className="text-2xl font-bold text-foreground">{totalBets}</div>
+                      <div className="text-2xl font-bold text-foreground">{currentContest.num_bets}</div>
                       <div className="text-sm text-muted-foreground">Apostas Realizadas</div>
                     </CardContent>
                   </Card>
@@ -146,7 +137,7 @@ const Index = () => {
                 <Button 
                   variant="hero" 
                   size="xl" 
-                  onClick={() => navigate("/bet")}
+                  onClick={() => navigate("/apostar")}
                   className="shadow-glow animate-pulse hover:animate-none"
                 >
                   <Play className="mr-2 h-5 w-5" />
@@ -195,18 +186,18 @@ const Index = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-              <Card className="bg-gradient-prize border-border shadow-elegant">
+              <Card className="bg-gradient-to-br from-yellow-300 to-yellow-600 border-border shadow-elegant">
                 <CardHeader className="text-center">
                   <div className="text-4xl mb-4">🥇</div>
                   <CardTitle className="text-2xl text-card-foreground">6 Acertos</CardTitle>
                 </CardHeader>
                 <CardContent className="text-center space-y-4">
                   <div className="text-3xl font-bold text-primary">80%</div>
-                  <p className="text-muted-foreground">
+                  <p className="text-white">
                     da arrecadação total dividida entre os ganhadores
                   </p>
-                  <Badge variant="secondary" className="text-sm">
-                    Taxa admin: 20% por prêmio
+                  <Badge variant="secondary" className="text-sm bg-green-500">
+                    Sua chance de ganhar muito!
                   </Badge>
                 </CardContent>
               </Card>
@@ -222,7 +213,7 @@ const Index = () => {
                     da arrecadação total dividida entre os ganhadores
                   </p>
                   <Badge variant="secondary" className="text-sm">
-                    Taxa admin: 20% por prêmio
+                    Não precisa acertar tudo!
                   </Badge>
                 </CardContent>
               </Card>
@@ -233,7 +224,7 @@ const Index = () => {
                 <CardContent className="p-6">
                   <h3 className="font-semibold text-foreground mb-2">📈 Prêmios Acumulados</h3>
                   <p className="text-muted-foreground">
-                    Se não houver ganhadores com 5 ou 6 acertos, o valor total acumula para o próximo sorteio!
+                    Se não houver ganhadores com 5+ acertos, o valor total acumula para o próximo sorteio!
                   </p>
                 </CardContent>
               </Card>
@@ -331,7 +322,7 @@ const Index = () => {
                   Todo último sábado do mês, baseado no resultado oficial da Lotomania da Caixa Econômica Federal.
                 </p>
                 <Button variant="link" className="mt-4 p-0" onClick={() => navigate("/dashboard")}>
-                  Ver Próximos Sorteios
+                  Ver Sorteios
                 </Button>
               </CardContent>
             </Card>
@@ -489,7 +480,7 @@ const Index = () => {
               <div className="space-y-2">
                 <Button 
                   size="sm"
-                  onClick={() => navigate("/dashboard")}
+                  onClick={() => navigate("/apostar")}
                   className="w-full"
                 >
                   <Play className="mr-2 h-4 w-4" />

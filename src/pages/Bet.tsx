@@ -178,7 +178,7 @@ export default function Bet() {
                 variant="outline"
                 size="sm"
                 className="mt-2"
-                onClick={() => navigate("/deposit")}
+                onClick={() => navigate("/depositar")}
               >
                 Depositar
               </Button>
