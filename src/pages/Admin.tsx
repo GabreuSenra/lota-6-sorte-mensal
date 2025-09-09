@@ -193,9 +193,9 @@ export default function Admin() {
     if (!currentContest || !winningNumbers) return;
 
     try {
-      const numbers = winningNumbers.split(",").map(n => parseInt(n.trim()));
+      const numbers = winningNumbers.split(",").map((n) => parseInt(n.trim()));
 
-      if (numbers.length !== 6 || numbers.some(n => isNaN(n) || n < 0 || n > 99)) {
+      if (numbers.length !== 6 || numbers.some((n) => isNaN(n) || n < 0 || n > 99)) {
         toast({
           title: "Erro",
           description: "Digite exatamente 6 números válidos separados por vírgula (0-99).",
@@ -204,19 +204,16 @@ export default function Admin() {
         return;
       }
 
-      const { error } = await supabase
-        .from("contests")
-        .update({
-          status: "closed",
-          winning_numbers: numbers
-        })
-        .eq("id", currentContest.id);
-
+      const { data, error } = await supabase.functions.invoke('handle-contest-end', {
+        body: { contestId: currentContest.id, winningNumbers: numbers },
+      });
       if (error) throw error;
 
       toast({
         title: "Sorteio finalizado",
-        description: "Resultado do sorteio foi registrado com sucesso.",
+        description: data?.hadWinners
+          ? `Prêmios pagos automaticamente. Vencedores 6: ${data.winners6} | Vencedores 5: ${data.winners5}`
+          : "Sem vencedores (5+). Valor acumula para o próximo sorteio.",
       });
 
       setCurrentContest(null);
@@ -242,6 +239,25 @@ export default function Admin() {
     }
 
     try {
+      // Determina o valor inicial (carryover) baseado no último sorteio fechado
+      let initialCollected = 0;
+      const { data: lastClosed } = await supabase
+        .from('contests')
+        .select('id, total_collected')
+        .eq('status', 'closed')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (lastClosed) {
+        const { count } = await supabase
+          .from('bets')
+          .select('id', { count: 'exact', head: true })
+          .eq('contest_id', lastClosed.id)
+          .gte('hits', 5);
+        initialCollected = count && count > 0 ? 0 : Number(lastClosed.total_collected || 0);
+      }
+
       const { error } = await supabase
         .from("contests")
         .insert({
@@ -249,14 +265,16 @@ export default function Admin() {
           draw_date: newContestData.drawDate,
           closing_date: newContestData.closingDate,
           status: "open",
-          total_collected: 0
+          total_collected: initialCollected
         });
 
       if (error) throw error;
 
       toast({
         title: "Novo sorteio criado",
-        description: "Sorteio foi criado e está aberto para apostas.",
+        description: initialCollected > 0
+          ? `Sorteio criado com acumulado de R$ ${initialCollected.toFixed(2)}`
+          : "Sorteio foi criado e está aberto para apostas.",
       });
 
       setNewContestData({ monthYear: "", drawDate: "", closingDate: "" });
