@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Trophy, User, LogIn } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import icon from "../../public/icon.png";
+import icon from "../icon.png";
 
 interface HeaderProps {
   isAuthenticated?: boolean;
