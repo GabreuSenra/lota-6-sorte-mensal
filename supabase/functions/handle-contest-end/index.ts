@@ -143,22 +143,22 @@ serve(async (req) => {
     }
 
     const totalCollected = Number(contest.total_collected || 0);
-    const prizeValue = Math.max(0, Math.round(totalCollected * 0.8 * 100) / 100); // 80% of total_collected
+    const prizeValue = Math.max(0, Math.round(totalCollected * 1.0 * 100) / 100); // 100% of total_collected (before admin fee)
 
     const count6 = winners6.length;
     const count5 = winners5.length;
     const hadWinners = count6 + count5 > 0;
 
-    // Distribute prizes: 6-hits get 80% of prizeValue, 5-hits get 20% of prizeValue
-    const pool6 = count6 > 0 ? prizeValue * 0.8 : 0;
-    const pool5 = count5 > 0 ? prizeValue * 0.2 : 0;
+// Distribute prizes: 6-hits get 80% of total_collected, 5-hits get 20% (admin fee deducted per prize later)
+const pool6 = count6 > 0 ? Math.round(prizeValue * 0.8 * 100) / 100 : 0;
+const pool5 = count5 > 0 ? Math.round(prizeValue * 0.2 * 100) / 100 : 0;
 
     // Round to cents
     const round2 = (v: number) => Math.round(v * 100) / 100;
 
     // Credit prizes and mark bets
     if (count6 > 0) {
-      const each = round2(pool6 / count6);
+      const each = round2((pool6 / count6) * 0.8); // deduct 20% admin fee per prize
       for (const w of winners6) {
         // Update wallet (fetch, add, update)
         const { data: wallet, error: wErr } = await supabaseAdmin
@@ -197,7 +197,7 @@ serve(async (req) => {
     }
 
     if (count5 > 0) {
-      const each = round2(pool5 / count5);
+      const each = round2((pool5 / count5) * 0.8); // deduct 20% admin fee per prize
       for (const w of winners5) {
         const { data: wallet, error: wErr } = await supabaseAdmin
           .from("wallets")
