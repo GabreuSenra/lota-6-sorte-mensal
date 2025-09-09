@@ -107,9 +107,6 @@ const Auth = () => {
                     <Input id="password2" type="password" placeholder="Mínimo 6 caracteres" {...signupForm.register("password")}/>
                   </div>
                   <Button type="submit" variant="prize" className="w-full">Criar conta</Button>
-                  <p className="text-xs text-muted-foreground text-center">
-                    Dica: Para testes, você pode desabilitar a confirmação de e-mail no Supabase (Auth → URL Configuration).
-                  </p>
                 </form>
               </TabsContent>
             </Tabs>
