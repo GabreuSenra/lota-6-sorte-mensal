@@ -65,9 +65,9 @@ const Index = () => {
   };
 
   const calculateDaysUntilDraw = () => {
-    if (!currentContest?.draw_date) return null;
+    if (!currentContest?.closing_date) return null;
     
-    const drawDate = new Date(currentContest.draw_date);
+    const drawDate = new Date(currentContest.closing_date);
     const today = new Date();
     const diffTime = drawDate.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -173,7 +173,7 @@ const Index = () => {
                   </p>
                   {currentContest.draw_date && (
                     <Badge variant="secondary" className="mt-2">
-                      Sorteio em: {new Date(currentContest.draw_date).toLocaleDateString('pt-BR')}
+                      Sorteio em: {new Date(currentContest.closing_date).toLocaleDateString('pt-BR')}
                     </Badge>
                   )}
                 </div>
@@ -264,7 +264,7 @@ const Index = () => {
                       <div className="text-lg text-foreground">
                         Números selecionados: <strong>{selectedNumbers.join(', ')}</strong>
                       </div>
-                      <Button variant="prize" size="xl" onClick={() => navigate("/bet")}>
+                      <Button variant="prize" size="xl" onClick={() => navigate("/apostar")}>
                         <Play className="mr-2 h-5 w-5" />
                         Confirmar Aposta - R$ 5,00
                       </Button>
@@ -286,7 +286,7 @@ const Index = () => {
                 <Button 
                   variant="secondary" 
                   size="xl"
-                  onClick={() => navigate("/bet")}
+                  onClick={() => navigate("/apostar")}
                   className="shadow-lg"
                 >
                   <Play className="mr-2 h-5 w-5" />
@@ -368,7 +368,7 @@ const Index = () => {
                 <p className="text-muted-foreground">
                   Selecione 6 números de 00 a 99 para sua aposta da sorte
                 </p>
-                <Button variant="outline" size="sm" onClick={handlePlayNow}>
+                <Button variant="outline" size="sm" onClick={() => navigate("/dashboard")}>
                   Escolher Agora
                 </Button>
               </div>
@@ -381,7 +381,7 @@ const Index = () => {
                 <p className="text-muted-foreground">
                   R$ 5,00 via PIX de forma 100% segura e instantânea
                 </p>
-                <Button variant="outline" size="sm" onClick={() => navigate("/bet")}>
+                <Button variant="outline" size="sm" onClick={() => navigate("/dashboard")}>
                   Ver Formas de Pagamento
                 </Button>
               </div>
@@ -425,14 +425,14 @@ const Index = () => {
                 O bolão mensal oficial baseado na Lotomania. Transparente, seguro e confiável.
               </p>
               <div className="flex space-x-2">
-                <Badge variant="secondary">Licenciado</Badge>
-                <Badge variant="secondary">Seguro</Badge>
+                <Badge variant="secondary">Legal</Badge>
+                <Badge variant="secondary">100% Seguro</Badge>
               </div>
             </div>
             
             <div>
               <h3 className="font-semibold text-foreground mb-4">📋 Links Úteis</h3>
-              <div className="space-y-2">
+              <div className="space-x-2">
                 <Button 
                   variant="link" 
                   className="p-0 h-auto justify-start text-sm"
@@ -459,7 +459,7 @@ const Index = () => {
             
             <div>
               <h3 className="font-semibold text-foreground mb-4">👤 Sua Conta</h3>
-              <div className="space-y-2">
+              <div className="space-x-2">
                 <Button 
                   variant="link" 
                   className="p-0 h-auto justify-start text-sm"
@@ -477,7 +477,7 @@ const Index = () => {
                 <Button 
                   variant="link" 
                   className="p-0 h-auto justify-start text-sm"
-                  onClick={() => navigate("/withdraw")}
+                  onClick={() => navigate("/dashboard")}
                 >
                   Sacar Prêmios
                 </Button>
@@ -489,7 +489,7 @@ const Index = () => {
               <div className="space-y-2">
                 <Button 
                   size="sm"
-                  onClick={() => navigate("/bet")}
+                  onClick={() => navigate("/dashboard")}
                   className="w-full"
                 >
                   <Play className="mr-2 h-4 w-4" />
