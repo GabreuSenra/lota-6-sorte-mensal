@@ -195,10 +195,10 @@ export default function Admin() {
     try {
       const numbers = winningNumbers.split(",").map((n) => parseInt(n.trim()));
 
-      if (numbers.length !== 6 || numbers.some((n) => isNaN(n) || n < 0 || n > 99)) {
+      if (numbers.length !== 20 || numbers.some((n) => isNaN(n) || n < 0 || n > 99)) {
         toast({
           title: "Erro",
-          description: "Digite exatamente 6 números válidos separados por vírgula (0-99).",
+          description: "Digite exatamente 20 números válidos separados por vírgula (0-99).",
           variant: "destructive",
         });
         return;
@@ -411,9 +411,9 @@ export default function Admin() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
-                      <label className="text-sm font-medium">Números Sorteados (separados por vírgula)</label>
+                      <label className="text-sm font-medium">Números Sorteados - 20 dezenas (separados por vírgula)</label>
                       <Input
-                        placeholder="Ex: 1, 15, 23, 45, 67, 89"
+                        placeholder="Ex: 1, 5, 8, 12, 15, 23, 28, 34, 37, 45, 52, 59, 63, 67, 71, 78, 82, 89, 94, 97"
                         value={winningNumbers}
                         onChange={(e) => setWinningNumbers(e.target.value)}
                       />

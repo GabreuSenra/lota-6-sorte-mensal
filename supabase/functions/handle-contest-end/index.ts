@@ -44,12 +44,12 @@ serve(async (req) => {
       });
     }
 
-    // Validate numbers: exactly 6, unique, 0..99
+    // Validate numbers: exactly 20, unique, 0..99
     const nums = winningNumbers.map((n) => Number(n));
     const unique = Array.from(new Set(nums));
-    const valid = nums.length === 6 && unique.length === 6 && nums.every((n) => Number.isInteger(n) && n >= 0 && n <= 99);
+    const valid = nums.length === 20 && unique.length === 20 && nums.every((n) => Number.isInteger(n) && n >= 0 && n <= 99);
     if (!valid) {
-      return new Response(JSON.stringify({ error: "Winning numbers must be 6 unique integers between 0 and 99" }), {
+      return new Response(JSON.stringify({ error: "Winning numbers must be 20 unique integers between 0 and 99" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
