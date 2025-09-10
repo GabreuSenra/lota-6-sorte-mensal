@@ -14,6 +14,7 @@ const Index = () => {
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
   const [showNumberPicker, setShowNumberPicker] = useState(false);
   const [currentContest, setCurrentContest] = useState<any>(null);
+  const [betPrice, setBetPrice] = useState(5); // Default bet price
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -32,6 +33,7 @@ const Index = () => {
 
       if (contest) {
         setCurrentContest(contest);
+        setBetPrice(contest.bet_price || 5);
       }
     } catch (error) {
       console.error('Error fetching contest data:', error);
@@ -142,7 +144,7 @@ const Index = () => {
                   className="shadow-glow animate-pulse hover:animate-none"
                 >
                   <Play className="mr-2 h-5 w-5" />
-                  🎯 Apostar Agora - R$ {currentContest.bet_price},00
+                  🎯 Apostar Agora - R$ {betPrice},00
                 </Button>
                 <Button 
                   variant="lucky" 
@@ -485,7 +487,7 @@ const Index = () => {
                   className="w-full"
                 >
                   <Play className="mr-2 h-4 w-4" />
-                  Apostar R$ {currentContest.bet_price},00
+                  Apostar R$ {betPrice},00
                 </Button>
                 <Button 
                   variant="outline"
