@@ -19,7 +19,12 @@ export const Header = ({
   const navigate = useNavigate();
 
   const navigateToHomepage = () => {
-    navigate("/");
+    if(isAuthenticated){
+      navigate("/dashboard");
+    }
+    else{
+      navigate("/");
+    }
   };
 
   return (
