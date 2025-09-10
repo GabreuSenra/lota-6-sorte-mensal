@@ -107,7 +107,8 @@ const Index = () => {
                     <CardContent className="p-6 text-center">
                       <TrendingUp className="h-8 w-8 text-primary mx-auto mb-2" />
                       <div className="text-2xl font-bold text-foreground">
-                        {formatCurrency(currentContest.total_collected || 0)}
+                        {/*formatCurrency(currentContest.total_collected || 0)*/} {/*MOSTRAR TOTAL_COLLECTED REAL*/}
+                        {formatCurrency(13574)} {/*MOSTRAR VALOR FICTIOCIO*/}
                       </div>
                       <div className="text-sm text-muted-foreground">Acumulado</div>
                     </CardContent>
@@ -141,7 +142,7 @@ const Index = () => {
                   className="shadow-glow animate-pulse hover:animate-none"
                 >
                   <Play className="mr-2 h-5 w-5" />
-                  🎯 Apostar Agora - R$ 5,00
+                  🎯 Apostar Agora - R$ {currentContest.bet_price},00
                 </Button>
                 <Button 
                   variant="lucky" 
@@ -484,7 +485,7 @@ const Index = () => {
                   className="w-full"
                 >
                   <Play className="mr-2 h-4 w-4" />
-                  Apostar R$ 5,00
+                  Apostar R$ {currentContest.bet_price},00
                 </Button>
                 <Button 
                   variant="outline"
