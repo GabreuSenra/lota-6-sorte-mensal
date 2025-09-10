@@ -99,16 +99,16 @@ export default function Bet() {
           description: "Sua aposta foi registrada com sucesso.",
         });
       }
-      else{
+      else {
         toast({
           title: "Erro",
           description: "Sua aposta não pode ser realizada!",
           variant: "destructive",
-      });
+        });
 
       }
 
-      navigate("/dashboard");
+      navigate("/apostar");
     } catch (error) {
       console.error("Error placing bet:", error);
       toast({
@@ -221,6 +221,13 @@ export default function Bet() {
               <p className="text-sm text-muted-foreground">
                 Valor da aposta: R$ {(currentContest?.bet_price || 5).toFixed(2)}
               </p>
+              <div className="flex gap-2 ml-auto">
+                <Button
+                variant="outline"
+                onClick={() => navigate("/transacoes")}
+                size="lg">
+                Ver minhas Transações
+              </Button>
               <Button
                 onClick={placeBet}
                 disabled={selectedNumbers.length !== 6 || placing || !wallet || wallet.balance < (currentContest?.bet_price || 5)}
@@ -228,6 +235,8 @@ export default function Bet() {
               >
                 {placing ? "Processando..." : `Apostar R$ ${(currentContest?.bet_price || 5).toFixed(2)}`}
               </Button>
+              </div>
+              
             </div>
           </CardContent>
         </Card>
