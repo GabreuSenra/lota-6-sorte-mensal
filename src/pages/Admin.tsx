@@ -210,6 +210,8 @@ export default function Admin() {
         body: { contestId: currentContest.id, winningNumbers: numbers },
       });
       if (error) throw error;
+      
+      console.log("numeros:", numbers);
 
       toast({
         title: "Sorteio finalizado",
