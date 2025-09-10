@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Trophy, User, LogIn } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import icon from "../icon.png";
 
 interface HeaderProps {
@@ -33,6 +34,7 @@ export const Header = ({
         </div>
 
         <nav className="flex items-center space-x-4">
+          <ThemeToggle />
           {isAuthenticated ? (
             <Button
               variant="ghost"

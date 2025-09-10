@@ -51,6 +51,7 @@ const Dashboard = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [profileForm, setProfileForm] = useState({
     full_name: "",
     cpf: "",
@@ -69,6 +70,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (user) {
       loadData();
+      checkAdminStatus();
     }
   }, [user]);
 
@@ -113,6 +115,19 @@ const Dashboard = () => {
       setRecentTransactions(transactionsData || []);
     } catch (error) {
       console.error("Error loading data:", error);
+    }
+  };
+
+  const checkAdminStatus = async () => {
+    if (!user) return;
+    
+    try {
+      const { data } = await supabase.functions.invoke('check-admin-status');
+      if (data && !data.error) {
+        setIsAdmin(data.isAdmin);
+      }
+    } catch (error) {
+      console.error("Error checking admin status:", error);
     }
   };
 
@@ -236,7 +251,7 @@ const Dashboard = () => {
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold text-foreground">Minha Conta</h1>
           <div className="flex gap-2">
-            {profile?.role === "admin" && (
+            {isAdmin && (
               <Button
                 variant="outline"
                 size="sm"

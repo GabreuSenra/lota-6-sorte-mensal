@@ -91,12 +91,13 @@ export type Database = {
       contests: {
         Row: {
           admin_fee_percentage: number | null
+          bet_price: number
           closing_date: string | null
           created_at: string
           draw_date: string
           id: string
-          lotomania_numbers: number[] | null
           month_year: string
+          num_bets: number | null
           status: string
           total_collected: number | null
           updated_at: string
@@ -104,12 +105,13 @@ export type Database = {
         }
         Insert: {
           admin_fee_percentage?: number | null
+          bet_price?: number
           closing_date?: string | null
           created_at?: string
           draw_date: string
           id?: string
-          lotomania_numbers?: number[] | null
           month_year: string
+          num_bets?: number | null
           status?: string
           total_collected?: number | null
           updated_at?: string
@@ -117,12 +119,13 @@ export type Database = {
         }
         Update: {
           admin_fee_percentage?: number | null
+          bet_price?: number
           closing_date?: string | null
           created_at?: string
           draw_date?: string
           id?: string
-          lotomania_numbers?: number[] | null
           month_year?: string
+          num_bets?: number | null
           status?: string
           total_collected?: number | null
           updated_at?: string
@@ -270,6 +273,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      increment_contest_total: {
+        Args: { amount_input: number; contest_id_input: string }
+        Returns: undefined
+      }
       is_admin: {
         Args: { user_uuid?: string }
         Returns: boolean

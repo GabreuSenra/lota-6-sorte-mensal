@@ -18,6 +18,7 @@ interface Contest {
   status: string;
   closing_date: string;
   total_collected: number;
+  bet_price?: number;
 }
 
 interface Wallet {
@@ -218,14 +219,14 @@ export default function Bet() {
 
             <div className="mt-6 flex justify-between items-center">
               <p className="text-sm text-muted-foreground">
-                Valor da aposta: R$ 5,00
+                Valor da aposta: R$ {(currentContest?.bet_price || 5).toFixed(2)}
               </p>
               <Button
                 onClick={placeBet}
-                disabled={selectedNumbers.length !== 6 || placing || !wallet || wallet.balance < 5}
+                disabled={selectedNumbers.length !== 6 || placing || !wallet || wallet.balance < (currentContest?.bet_price || 5)}
                 size="lg"
               >
-                {placing ? "Processando..." : "Apostar R$ 5,00"}
+                {placing ? "Processando..." : `Apostar R$ ${(currentContest?.bet_price || 5).toFixed(2)}`}
               </Button>
             </div>
           </CardContent>

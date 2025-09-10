@@ -32,6 +32,7 @@ interface Contest {
   closing_date: string;
   total_collected: number;
   winning_numbers: number[] | null;
+  bet_price?: number;
 }
 
 export default function Admin() {
@@ -47,7 +48,8 @@ export default function Admin() {
   const [newContestData, setNewContestData] = useState({
     monthYear: "",
     drawDate: "",
-    closingDate: ""
+    closingDate: "",
+    betPrice: "5.00"
   });
 
   useEffect(() => {
@@ -229,10 +231,20 @@ export default function Admin() {
   };
 
   const createNewContest = async () => {
-    if (!newContestData.monthYear || !newContestData.drawDate || !newContestData.closingDate) {
+    if (!newContestData.monthYear || !newContestData.drawDate || !newContestData.closingDate || !newContestData.betPrice) {
       toast({
         title: "Erro",
         description: "Preencha todos os campos.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const betPriceValue = parseFloat(newContestData.betPrice);
+    if (isNaN(betPriceValue) || betPriceValue <= 0) {
+      toast({
+        title: "Erro",
+        description: "Digite um preço válido para a aposta.",
         variant: "destructive",
       });
       return;
@@ -264,6 +276,7 @@ export default function Admin() {
           month_year: newContestData.monthYear,
           draw_date: newContestData.drawDate,
           closing_date: newContestData.closingDate,
+          bet_price: betPriceValue,
           status: "open",
           total_collected: initialCollected
         });
@@ -273,11 +286,11 @@ export default function Admin() {
       toast({
         title: "Novo sorteio criado",
         description: initialCollected > 0
-          ? `Sorteio criado com acumulado de R$ ${initialCollected.toFixed(2)}`
-          : "Sorteio foi criado e está aberto para apostas.",
+          ? `Sorteio criado com acumulado de R$ ${initialCollected.toFixed(2)} e preço da aposta R$ ${betPriceValue.toFixed(2)}`
+          : `Sorteio foi criado com preço da aposta R$ ${betPriceValue.toFixed(2)} e está aberto para apostas.`,
       });
 
-      setNewContestData({ monthYear: "", drawDate: "", closingDate: "" });
+      setNewContestData({ monthYear: "", drawDate: "", closingDate: "", betPrice: "5.00" });
       await fetchData();
     } catch (error) {
       console.error("Error creating contest:", error);
@@ -406,7 +419,7 @@ export default function Admin() {
                       Finalizar Sorteio Atual
                     </CardTitle>
                     <CardDescription>
-                      {currentContest.month_year} - R$ {currentContest.total_collected.toFixed(2)} arrecadado
+                      {currentContest.month_year} - R$ {currentContest.total_collected.toFixed(2)} arrecadado - Preço da aposta: R$ {(currentContest.bet_price || 5.00).toFixed(2)}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -454,6 +467,17 @@ export default function Admin() {
                       type="datetime-local"
                       value={newContestData.closingDate}
                       onChange={(e) => setNewContestData({ ...newContestData, closingDate: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Preço da Aposta (R$)</label>
+                    <Input
+                      type="number"
+                      min="0.01"
+                      step="0.01"
+                      placeholder="5.00"
+                      value={newContestData.betPrice}
+                      onChange={(e) => setNewContestData({ ...newContestData, betPrice: e.target.value })}
                     />
                   </div>
                   <Button onClick={createNewContest} className="w-full">

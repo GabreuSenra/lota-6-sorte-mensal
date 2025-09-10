@@ -20,7 +20,14 @@ const loginSchema = z.object({
 
 type LoginForm = z.infer<typeof loginSchema>;
 
-const signupSchema = loginSchema;
+const signupSchema = z.object({
+  email: z.string().email("E-mail inválido"),
+  password: z.string().min(6, "Mínimo 6 caracteres"),
+  confirmPassword: z.string().min(6, "Mínimo 6 caracteres"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "As senhas não coincidem",
+  path: ["confirmPassword"],
+});
 type SignupForm = z.infer<typeof signupSchema>;
 
 const Auth = () => {
@@ -105,6 +112,16 @@ const Auth = () => {
                   <div className="space-y-2">
                     <Label htmlFor="password2">Senha</Label>
                     <Input id="password2" type="password" placeholder="Mínimo 6 caracteres" {...signupForm.register("password")}/>
+                    {signupForm.formState.errors.password && (
+                      <p className="text-sm text-destructive">{signupForm.formState.errors.password.message}</p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">Confirmar Senha</Label>
+                    <Input id="confirmPassword" type="password" placeholder="Digite a senha novamente" {...signupForm.register("confirmPassword")}/>
+                    {signupForm.formState.errors.confirmPassword && (
+                      <p className="text-sm text-destructive">{signupForm.formState.errors.confirmPassword.message}</p>
+                    )}
                   </div>
                   <Button type="submit" variant="prize" className="w-full">Criar conta</Button>
                 </form>
