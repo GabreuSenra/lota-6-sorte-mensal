@@ -260,7 +260,7 @@ const Index = () => {
                       </div>
                       <Button variant="prize" size="xl" onClick={() => navigate("/apostar")}>
                         <Play className="mr-2 h-5 w-5" />
-                        Confirmar Aposta - R$ 5,00
+                        Confirmar Aposta - R$ {betPrice},00
                       </Button>
                     </div>
                   )}
@@ -274,7 +274,7 @@ const Index = () => {
             <div className="bg-gradient-lucky rounded-2xl p-8 text-primary-foreground">
               <h2 className="text-3xl font-bold mb-4">🚀 Não Perca a Chance!</h2>
               <p className="text-lg mb-6 opacity-90">
-                Cada aposta custa apenas R$ 5,00 e você pode ganhar uma fortuna!
+                Cada aposta custa apenas R$ {betPrice},00 e você pode ganhar uma fortuna!
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button 
@@ -290,7 +290,7 @@ const Index = () => {
                   variant="outline" 
                   size="xl"
                   onClick={handlePlayNow}
-                  className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
+                  className="border-primary-foreground text-green-500 hover:bg-primary-foreground hover:text-primary"
                 >
                   Simular Números
                 </Button>

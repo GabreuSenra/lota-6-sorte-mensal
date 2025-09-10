@@ -6,11 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, CheckCircle, XCircle, DollarSign, Calendar } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, DollarSign, Calendar, Car } from "lucide-react";
 import { Header } from "@/components/Header";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { set } from "date-fns";
 
 interface WithdrawRequest {
   id: string;
@@ -35,6 +36,13 @@ interface Contest {
   bet_price?: number;
 }
 
+interface Rateio {
+  id: number;
+  house_share: number;
+  six_hits_share: number;
+  five_hits_share: number;
+}
+
 export default function Admin() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -44,6 +52,7 @@ export default function Admin() {
   const [loading, setLoading] = useState(true);
   const [withdrawRequests, setWithdrawRequests] = useState<WithdrawRequest[]>([]);
   const [currentContest, setCurrentContest] = useState<Contest | null>(null);
+  const [rateios, setRateios] = useState<Rateio | null>(null);
   const [winningNumbers, setWinningNumbers] = useState<string>("");
   const [newContestData, setNewContestData] = useState({
     monthYear: "",
@@ -144,6 +153,14 @@ export default function Admin() {
         .single();
 
       setCurrentContest(contestData);
+
+      const { data: rateiosData } = await supabase
+        .from("rateios")
+        .select("*")
+        .single();
+
+      setRateios(rateiosData);
+
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -169,7 +186,6 @@ export default function Admin() {
       });
     }
   };
-
   const rejectWithdrawal = async (withdrawalId: string) => {
     try {
       const { data, error } = await supabase.functions.invoke('reject-withdrawal', {
@@ -190,7 +206,6 @@ export default function Admin() {
       });
     }
   };
-
   const finalizeContest = async () => {
     if (!currentContest || !winningNumbers) return;
 
@@ -210,7 +225,7 @@ export default function Admin() {
         body: { contestId: currentContest.id, winningNumbers: numbers },
       });
       if (error) throw error;
-      
+
       console.log("numeros:", numbers);
 
       toast({
@@ -231,7 +246,7 @@ export default function Admin() {
       });
     }
   };
-
+  //transformar em edge-function
   const createNewContest = async () => {
     if (!newContestData.monthYear || !newContestData.drawDate || !newContestData.closingDate || !newContestData.betPrice) {
       toast({
@@ -303,6 +318,83 @@ export default function Admin() {
       });
     }
   };
+  //transformar em edge-function
+  const updateRateios = async () => {
+
+    console.log("rateios:", rateios);
+
+    if (!rateios.house_share || !rateios.six_hits_share || !rateios.five_hits_share) {
+      toast({
+        title: "Erro",
+        description: "Preencha todos os campos.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (rateios.house_share < 0 || rateios.six_hits_share < 0 || rateios.five_hits_share < 0) {
+      toast({
+        title: "Erro",
+        description: "Os valores não podem ser negativos.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (rateios.house_share > 100) {
+      toast({
+        title: "Erro",
+        description: "A casa não pode receber mais que 100%.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (rateios.six_hits_share + rateios.five_hits_share !== 100) {
+      console.log("soma:", rateios.six_hits_share + rateios.five_hits_share);
+      toast({
+        title: "Erro",
+        description: "A soma dos percentuais de premiação deve ser igual a 100%.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Upsert no banco de dados
+      const { data, error } = await supabase
+        .from("rateios")
+        .update({
+          house_share: rateios.house_share,
+          six_hits_share: rateios.six_hits_share,
+          five_hits_share: rateios.five_hits_share
+        })
+        .eq("id", rateios.id);
+
+      // Verificação de erro no upsert
+      if (error) {
+        throw new Error(error.message); // Lançar o erro se algo deu errado
+      }
+
+      // Exibir mensagem de sucesso
+      toast({
+        title: "Rateios atualizados",
+        description: "As alterações foram salvas com sucesso.",
+      });
+
+      // Atualizar os dados na interface
+      await fetchData();
+
+    } catch (error: any) {
+      // Captura de erro
+      toast({
+        title: "Erro",
+        description: error.message || "As alterações não foram salvas.",
+        variant: "destructive",
+      });
+    }
+
+  };
 
   if (loading) {
     return <div className="container mx-auto p-4">Carregando...</div>;
@@ -346,6 +438,7 @@ export default function Admin() {
           <TabsList>
             <TabsTrigger value="withdrawals">Solicitações de Saque</TabsTrigger>
             <TabsTrigger value="contests">Gerenciar Sorteios</TabsTrigger>
+            <TabsTrigger value="rateios">Rateios</TabsTrigger>
           </TabsList>
 
           <TabsContent value="withdrawals">
@@ -487,6 +580,141 @@ export default function Admin() {
                   </Button>
                 </CardContent>
               </Card>)}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="rateios">
+            <div className="grid gap-6 md:grid-cols-1">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Configurar valores de rateio</CardTitle>
+                  <CardDescription>
+                    Configure os valores que cada categoria de acerto irá receber, e quanto a casa irá reter.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="text-sm font-medium">TAXA DA CASA</label>
+                      <div className="flex items-center border border-gray-300 rounded-md">
+                        <Input
+                          className="border-none p-2 rounded-l-md"
+                          placeholder="Ex: 20"
+                          type="number"
+                          value={rateios.house_share}
+                          onChange={(e) => setRateios({ ...rateios, house_share: e.target.value ? parseInt(e.target.value) : 0 })}
+                        />
+                        <span className="text-sm font-medium p-2">%</span>
+                      </div>
+                      <div className="text-sm text-muted-foreground">Percentual destinado à casa (taxa administrativa sobre cada prêmio individual)</div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Rateio para ganhadores com 6 (SEIS) acertos</label>
+                      <div className="flex items-center border border-gray-300 rounded-md">
+                        <Input
+                          className="border-none p-2 rounded-l-md"
+                          placeholder="Ex: 80"
+                          type="number"
+                          value={rateios.six_hits_share}
+                          onChange={(e) => setRateios({ ...rateios, six_hits_share: e.target.value ? parseInt(e.target.value) : 0 })}
+                        />
+                        <span className="text-sm font-medium p-2">%</span>
+                      </div>
+                      <div className="text-sm text-muted-foreground">Percentual do valor total arrecadado destinado aos apostadores com 6 acertos (antes da taxa administrativa).</div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Rateio para ganhadores com 5 (CINCO) acertos</label>
+                      <div className="flex items-center border border-gray-300 rounded-md">
+                        <Input
+                          className="border-none p-2 rounded-l-md"
+                          placeholder="Ex: 20"
+                          type="number"
+                          value={rateios.five_hits_share}
+                          onChange={(e) => setRateios({ ...rateios, five_hits_share: e.target.value ? parseInt(e.target.value) : 0 })}
+                        />
+                        <span className="text-sm font-medium p-2">%</span>
+                      </div>
+                      <div className="text-sm text-muted-foreground">Percentual do valor total arrecadado destinado aos apostadores com 5 acertos (antes da taxa administrativa).</div>
+                    </div>
+                  </div>
+
+                  <Button onClick={updateRateios} className="w-full">
+                    Salvar alterações
+                  </Button>
+
+                  <div className="w-full">
+                    <div className="mx-auto p-6 rounded-2xl shadow-md">
+                      <header className="mb-4">
+                        <h3 className="text-2xl font-semibold" >Como funciona a premiação</h3>
+                        <p className="mt-1 text-sm" >
+                          Resumo rápido das regras de divisão do prêmio e da taxa da casa.
+                        </p>
+                      </header>
+
+
+                      <section className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+                        <div className="p-3 rounded-xl" style={{ border: '1px dashed #ead8c1' }}>
+                          <div className="text-xs uppercase font-medium" >house_share</div>
+                          <div className="mt-1 text-sm font-semibold" >
+                            Percentual retido da casa sobre cada prêmio individual
+                          </div>
+                        </div>
+
+
+                        <div className="p-3 rounded-xl" style={{ border: '1px dashed #ead8c1' }}>
+                          <div className="text-xs uppercase font-medium" >winner6</div>
+                          <div className="mt-1 text-sm font-semibold" >
+                            Percentual do total arrecadado destinado aos acertadores com 6 números
+                          </div>
+                        </div>
+
+
+                        <div className="p-3 rounded-xl" style={{ border: '1px dashed #ead8c1' }}>
+                          <div className="text-xs uppercase font-medium" >winner5</div>
+                          <div className="mt-1 text-sm font-semibold" >
+                            Percentual do total arrecadado destinado aos acertadores com 5 números
+                          </div>
+                        </div>
+                      </section>
+
+
+                      <section className="mb-4">
+                        <p className="text-sm" >
+                          Primeiro o valor arrecadado é dividido entre os grupos de vencedores (<span className="font-semibold">winner6</span> e <span className="font-semibold">winner5</span>). Em seguida, cada prêmio individual recebe a dedução da <span className="font-semibold">house_share</span> (taxa da casa).
+                        </p>
+                      </section>
+
+
+                      <section className="p-4 rounded-lg" style={{ border: '1px dashed #e6cfae' }}>
+                        <div className="text-sm font-medium mb-2" >Fórmula</div>
+                        <pre className="text-sm p-2 rounded-md" style={{ border: '1px solid #f0e6dd' }}>
+                          {`Prêmio bruto individual = (total_arrecadado * percentual_do_grupo) / número_de_ganhadores_do_grupo
+Prêmio líquido = Prêmio bruto individual * (1 - house_share)`}
+                        </pre>
+
+
+                        <div className="mt-3 text-sm font-medium" >Exemplo</div>
+                        <div className="mt-2 text-sm" >
+                          Total arrecadado: <span className="font-semibold">R$ 1.000,00</span>
+                          <br />
+                          winner6 = 80% → valor do grupo: <span className="font-semibold">R$ 800,00</span>
+                          <br />
+                          4 ganhadores de 6 acertos → prêmio bruto individual: <span className="font-semibold">R$ 200,00</span>
+                          <br />
+                          house_share = 20% → prêmio líquido: <span className="font-semibold">R$ 160,00</span>
+                          <br />
+                          (Cálculo: <code>200 × (1 - 0.20) = 160</code>)
+                        </div>
+                      </section>
+
+
+                      <footer className="mt-4 text-xs" >
+                        Nota: todos os cálculos devem ser arredondados para centavos. Ajustes de arredondamento podem ser aplicados pelo sistema.
+                      </footer>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
         </Tabs>
