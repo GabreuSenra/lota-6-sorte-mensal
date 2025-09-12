@@ -185,22 +185,25 @@ export default function Bet() {
               </Button>
             </CardContent>
           </Card>
+          {currentContest.total_collected >= 8000 && (
+            <><Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  Projeção de prêmio do Sorteio
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-lg font-bold text-primary">
+                  R$ {currentContest.total_collected.toFixed(2)}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {currentContest.month_year}
+                </p>
+              </CardContent>
+            </Card>
+            </>
+          )}
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                Prêmio do Sorteio
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-lg font-bold text-primary">
-                R$ {currentContest.total_collected.toFixed(2)}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {currentContest.month_year}
-              </p>
-            </CardContent>
-          </Card>
         </div>
 
         <Card className="mt-6">
@@ -223,20 +226,20 @@ export default function Bet() {
               </p>
               <div className="flex gap-2 ml-auto">
                 <Button
-                variant="outline"
-                onClick={() => navigate("/transacoes")}
-                size="lg">
-                Ver minhas Transações
-              </Button>
-              <Button
-                onClick={placeBet}
-                disabled={selectedNumbers.length !== 6 || placing || !wallet || wallet.balance < (currentContest?.bet_price || 5)}
-                size="lg"
-              >
-                {placing ? "Processando..." : `Apostar R$ ${(currentContest?.bet_price || 5).toFixed(2)}`}
-              </Button>
+                  variant="outline"
+                  onClick={() => navigate("/transacoes")}
+                  size="lg">
+                  Ver minhas Transações
+                </Button>
+                <Button
+                  onClick={placeBet}
+                  disabled={selectedNumbers.length !== 6 || placing || !wallet || wallet.balance < (currentContest?.bet_price || 5)}
+                  size="lg"
+                >
+                  {placing ? "Processando..." : `Apostar R$ ${(currentContest?.bet_price || 5).toFixed(2)}`}
+                </Button>
               </div>
-              
+
             </div>
           </CardContent>
         </Card>

@@ -78,7 +78,7 @@ export default function ResponsibleGaming() {
 
             <div>
               <h2 className="text-xl font-semibold mb-3">Limites Recomendados</h2>
-              <div className="bg-blue-50 p-4 rounded-lg">
+              <div className="bg-blue-500 p-4 rounded-lg">
                 <p className="font-medium mb-2">Para o Lota 6 Sorte especificamente:</p>
                 <ul className="list-disc pl-6 space-y-1">
                   <li>Limite máximo sugerido: R$ 20,00 por mês (4 apostas)</li>
@@ -92,7 +92,7 @@ export default function ResponsibleGaming() {
               <h2 className="text-xl font-semibold mb-3">Quando Buscar Ajuda</h2>
               <p>Se você ou alguém que conhece apresenta sinais de jogo problemático, procure ajuda:</p>
               
-              <div className="bg-yellow-50 p-4 rounded-lg mt-4">
+              <div className="bg-yellow-500 p-4 rounded-lg mt-4">
                 <h3 className="font-medium mb-2">Recursos de Apoio:</h3>
                 <ul className="space-y-2">
                   <li>
