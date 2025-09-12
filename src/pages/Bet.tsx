@@ -102,7 +102,7 @@ export default function Bet() {
       else {
         toast({
           title: "Erro",
-          description: "Sua aposta não pode ser realizada!",
+          description: "Sua aposta não pode ser realizada!" + error,
           variant: "destructive",
         });
 

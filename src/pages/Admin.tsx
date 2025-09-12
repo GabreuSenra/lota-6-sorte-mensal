@@ -6,12 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, CheckCircle, XCircle, DollarSign, Calendar, Car } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, DollarSign, Calendar, Car, Trophy } from "lucide-react";
 import { Header } from "@/components/Header";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { set } from "date-fns";
+import { dataTagErrorSymbol } from "@tanstack/react-query";
 
 interface WithdrawRequest {
   id: string;
@@ -43,6 +44,24 @@ interface Rateio {
   five_hits_share: number;
 }
 
+interface Ganhador {
+  bet_id: string;
+  created_at: string;
+  bets: {
+    hits: number[];
+    prize_amount: number;
+    chosen_numbers: number[];
+    contest_id: string;
+    profiles: {
+      full_name: string;
+    };
+    contests: {
+      winning_numbers: number[];
+    }
+  };
+}
+
+
 export default function Admin() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -51,6 +70,7 @@ export default function Admin() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [withdrawRequests, setWithdrawRequests] = useState<WithdrawRequest[]>([]);
+  const [ganhadores, setGanhadores] = useState<Ganhador[]>([]);
   const [currentContest, setCurrentContest] = useState<Contest | null>(null);
   const [rateios, setRateios] = useState<Rateio | null>(null);
   const [winningNumbers, setWinningNumbers] = useState<string>("");
@@ -160,6 +180,70 @@ export default function Admin() {
         .single();
 
       setRateios(rateiosData);
+
+      // Fetch ganhadores + bets
+      const { data: ganhadoresData } = await supabase
+        .from("ganhadores")
+        .select(`
+          bet_id,
+          created_at,
+          bets (
+            chosen_numbers,
+            user_id,
+            hits,
+            prize_amount,
+            contest_id,
+            contests ( winning_numbers )
+          )
+        `)
+        .order("created_at", { ascending: true });
+
+      // Fetch profile data separately for each Ganhador
+      const ganhadoresComProfile = [];
+
+      if (ganhadoresData) {
+        for (const gan of ganhadoresData) {
+          // Acessando o user_id de cada ganhador
+          const user_id = gan.bets.user_id;
+
+          const { data: profileData } = await supabase
+            .from("profiles")
+            .select("full_name")
+            .eq("user_id", user_id) // Usando o user_id de cada ganhador
+            .single();
+
+          // Se profileData existe e tem um nome
+          if (profileData && profileData.full_name) {
+            const fullName = profileData.full_name.trim();
+
+            // Dividindo o nome completo em partes (usando o espaço como separador)
+            const nameParts = fullName.split(' ');
+
+            // Pega o primeiro nome completo (primeiro item)
+            const firstName = nameParts[0];
+
+            // Pega as iniciais dos sobrenomes (todas as partes após o primeiro nome)
+            const lastNameInitials = nameParts.slice(1).map(part => part[0]).join('. ');
+
+            // Formando o nome com o primeiro nome e as iniciais dos sobrenomes
+            const formattedName = `${firstName} ${lastNameInitials ? lastNameInitials + '.' : ''}`;
+
+            // Adiciona ao array com o nome formatado
+            ganhadoresComProfile.push({
+              ...gan,
+              profiles: { full_name: formattedName }
+            });
+          } else {
+            // Se não encontrar o nome, coloca "N/A"
+            ganhadoresComProfile.push({
+              ...gan,
+              profiles: { full_name: "N/A" }
+            });
+          }
+        }
+      }
+
+      setGanhadores(ganhadoresComProfile);
 
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -396,6 +480,7 @@ export default function Admin() {
 
   };
 
+
   if (loading) {
     return <div className="container mx-auto p-4">Carregando...</div>;
   }
@@ -438,6 +523,7 @@ export default function Admin() {
           <TabsList>
             <TabsTrigger value="withdrawals">Solicitações de Saque</TabsTrigger>
             <TabsTrigger value="contests">Gerenciar Sorteios</TabsTrigger>
+            <TabsTrigger value="vencedores">Vencedores</TabsTrigger>
             <TabsTrigger value="rateios">Rateios</TabsTrigger>
           </TabsList>
 
@@ -712,6 +798,94 @@ Prêmio líquido = Prêmio bruto individual * (1 - house_share)`}
                         Nota: todos os cálculos devem ser arredondados para centavos. Ajustes de arredondamento podem ser aplicados pelo sistema.
                       </footer>
                     </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="vencedores">
+            <div className="grid gap-6 md:grid-cols-1">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Vencedores do sorteio</CardTitle>
+                  <CardDescription>
+                    Aqui você pode ver todos os vencedores dos sorteios ordenados do mais recente ao mais antigo.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-1 gap-4 ">
+                    {ganhadores.length === 0 ? (
+                      <p>Vazio</p>
+                    ) : (
+                      <div className="space-y-4">
+                        {ganhadores.map((ganhador) => {
+                          // pega winning_numbers de forma segura (pode vir como objeto ou array)
+                          const rawContest = ganhador?.bets?.contests;
+                          const winningNumbers =
+                            Array.isArray(rawContest)
+                              ? rawContest[0]?.winning_numbers ?? []
+                              : rawContest?.winning_numbers ?? [];
+
+                          return (
+                            <div key={ganhador.bet_id} className="border rounded-lg p-4 space-y-2">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <p className="font-medium">{ganhador.profiles?.full_name || "N/A"}</p>
+                                  <p className="text-sm text-muted-foreground">
+                                    Data: {new Date(ganhador.created_at).toLocaleDateString("pt-BR")}
+                                  </p>
+                                </div>
+
+                                <div className="text-right">
+                                  <h4 className="font-medium text-sm text-muted-foreground mb-2">
+                        Seus números:
+                      </h4>
+                                  <div className="flex flex-wrap gap-2 justify-end">
+                                    {ganhador.bets?.chosen_numbers
+                                      .slice() // evita mutar o array original com sort
+                                      .sort((a, b) => a - b)
+                                      .map((number) => {
+                                        const isWinning = winningNumbers?.includes(number);
+                                        return (
+                                          <span
+                                            key={number}
+                                            className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold
+                      ${isWinning ? "bg-green-600 text-white" : "bg-white text-gray-800 border"}
+                    `}
+                                          >
+                                            {number.toString().padStart(2, "0")}
+                                          </span>
+                                        );
+                                      })}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex justify-between items-center pt-4 border-t">
+                                {ganhador.bets?.hits !== null && (
+                                  <div className="text-sm">
+                                    <span className="text-muted-foreground">Acertos: </span>
+                                    <span className="font-bold text-primary">{ganhador.bets?.hits}</span>
+                                  </div>
+                                )}
+
+                                {ganhador.bets?.prize_amount && ganhador.bets?.prize_amount > 0 && (
+                                  <div className="flex items-center gap-2">
+                                    <Trophy className="h-4 w-4 text-yellow-500" />
+                                    <div className="text-sm">
+                                      <span className="text-muted-foreground">Prêmio: </span>
+                                      <span className="font-bold text-green-600">
+                                        R$ {ganhador.bets?.prize_amount.toFixed(2)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
